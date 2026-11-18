@@ -1,0 +1,711 @@
+{
+ "clean": {
+  "wikitext2_nll": 3.365045052308303,
+  "wikitext2_ppl": 28.93480084925451,
+  "wikitext2_top1": 0.39433092948717946,
+  "blimp_acc": 0.8295522388059702,
+  "capitals_acc": 0.5625
+ },
+ "cases": {
+  "A": {
+   "condition": "scatter_zero",
+   "damaged": {
+    "wikitext2_nll": 68.9634017944336,
+    "wikitext2_ppl": 5.184705528587072e+21,
+    "wikitext2_top1": 0.036783854166666664,
+    "blimp_acc": 0.5098507462686567,
+    "capitals_acc": 0.025,
+    "n_damaged": 1244026,
+    "frac_of_model": 0.009997009960028225
+   },
+   "repairs": {
+    "heuristic": {
+     "wikitext2_nll": 9.230243854033642,
+     "wikitext2_ppl": 10201.028770442375,
+     "wikitext2_top1": 0.026667668269230768,
+     "blimp_acc": 0.551044776119403,
+     "capitals_acc": 0.0125,
+     "residual": 0.9522168963155836,
+     "recall": 1.0,
+     "precision": 0.9621877402518652,
+     "n_changed": 1292914,
+     "collateral": 0.08415065459174073,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 1.0001250398807315,
+      "attn.c_proj": 1.000919944711032,
+      "mlp.c_fc": 1.0008283712911121,
+      "mlp.c_proj": 0.9991822146552296,
+      "wpe": 0.9772169663428297,
+      "wte": 0.8571195456636359
+     },
+     "recovery": 0.9105892419716836,
+     "status": "ok"
+    },
+    "fable": {
+     "wikitext2_nll": 3.414557261344714,
+     "wikitext2_ppl": 30.40348564896528,
+     "wikitext2_top1": 0.39075020032051283,
+     "blimp_acc": 0.8244776119402986,
+     "capitals_acc": 0.3875,
+     "residual": 0.818160836843359,
+     "recall": 1.0,
+     "precision": 1.0,
+     "n_changed": 1244026,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.8822338510979439,
+      "attn.c_proj": 0.9348639901570277,
+      "mlp.c_fc": 0.9108750864926701,
+      "mlp.c_proj": 0.944201745775283,
+      "wpe": 0.19866769418377223,
+      "wte": 0.6101777871196006
+     },
+     "recovery": 0.9992452218089694,
+     "status": "ok"
+    },
+    "opus": {
+     "wikitext2_nll": 3.408716061176398,
+     "wikitext2_ppl": 30.22641047272761,
+     "wikitext2_top1": 0.3908503605769231,
+     "blimp_acc": 0.8250746268656717,
+     "capitals_acc": 0.425,
+     "residual": 0.8503006874011262,
+     "recall": 1.0,
+     "precision": 1.0,
+     "n_changed": 1244026,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.8807002280534306,
+      "attn.c_proj": 0.9297651222057742,
+      "mlp.c_fc": 0.9121105873983597,
+      "mlp.c_proj": 0.9425513230666207,
+      "wpe": 0.1945995882886862,
+      "wte": 0.7267042877408286
+     },
+     "recovery": 0.9993342667250071,
+     "status": "ok"
+    },
+    "sonnet": {
+     "wikitext2_nll": 3.596688301135332,
+     "wikitext2_ppl": 36.47723258367233,
+     "wikitext2_top1": 0.36015124198717946,
+     "blimp_acc": 0.8167164179104478,
+     "capitals_acc": 0.325,
+     "residual": 0.9153837663528616,
+     "recall": 0.9571214749530959,
+     "precision": 1.0,
+     "n_changed": 1190684,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.9575928839393488,
+      "attn.c_proj": 0.9761499585260126,
+      "mlp.c_fc": 0.9601245158935401,
+      "mlp.c_proj": 0.9877894771426962,
+      "wpe": 0.20765140498718695,
+      "wte": 0.8153418887813995
+     },
+     "recovery": 0.9964687644579628,
+     "status": "ok"
+    },
+    "haiku": {
+     "wikitext2_nll": 3.9335141548743615,
+     "wikitext2_ppl": 51.08618737381924,
+     "wikitext2_top1": 0.31958633814102566,
+     "blimp_acc": 0.8,
+     "capitals_acc": 0.0125,
+     "residual": 0.9373838465038047,
+     "recall": 0.7721687488846696,
+     "precision": 1.0,
+     "n_changed": 960598,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.9713940953309049,
+      "attn.c_proj": 1.1528938653461613,
+      "mlp.c_fc": 0.9716320056030443,
+      "mlp.c_proj": 1.0,
+      "wpe": 0.19947520379760544,
+      "wte": 0.8306878533706632
+     },
+     "recovery": 0.9913340953828954,
+     "status": "ok"
+    },
+    "colmean_zero": {
+     "wikitext2_nll": 3.4465130353585267,
+     "wikitext2_ppl": 31.390742837590828,
+     "wikitext2_top1": 0.3876452323717949,
+     "blimp_acc": 0.817910447761194,
+     "capitals_acc": 0.425,
+     "residual": 0.9521953780193685,
+     "recall": 1.0,
+     "precision": 1.0,
+     "n_changed": 1244026,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 1.0001271129081242,
+      "attn.c_proj": 1.000674675538298,
+      "mlp.c_fc": 1.0008029111247325,
+      "mlp.c_proj": 0.9991684082580221,
+      "wpe": 0.9772599069943914,
+      "wte": 0.8571141861941969
+     },
+     "recovery": 0.9987580789047739,
+     "status": "ok"
+    },
+    "oracle_colmean": {
+     "wikitext2_nll": 3.4465130353585267,
+     "wikitext2_ppl": 31.390742837590828,
+     "wikitext2_top1": 0.3876452323717949,
+     "blimp_acc": 0.817910447761194,
+     "capitals_acc": 0.425,
+     "residual": 0.9521953780193685,
+     "recall": 1.0,
+     "precision": 1.0,
+     "n_changed": 1244026,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 1.0001271129081242,
+      "attn.c_proj": 1.000674675538298,
+      "mlp.c_fc": 1.0008029111247325,
+      "mlp.c_proj": 0.9991684082580221,
+      "wpe": 0.9772599069943914,
+      "wte": 0.8571141861941969
+     },
+     "recovery": 0.9987580789047739,
+     "status": "ok"
+    }
+   }
+  },
+  "B": {
+   "condition": "scatter_noise",
+   "damaged": {
+    "wikitext2_nll": 373.1636962890625,
+    "wikitext2_ppl": 5.184705528587072e+21,
+    "wikitext2_top1": 0.0,
+    "blimp_acc": 0.5023880597014926,
+    "capitals_acc": 0.0125,
+    "n_damaged": 1243797,
+    "frac_of_model": 0.009995169712894447
+   },
+   "repairs": {
+    "heuristic": {
+     "wikitext2_nll": 11.223099219493378,
+     "wikitext2_ppl": 74839.35930538698,
+     "wikitext2_top1": 0.001727764423076923,
+     "blimp_acc": 0.5068656716417911,
+     "capitals_acc": 0.025,
+     "residual": 0.3215360554499918,
+     "recall": 0.4711098354474243,
+     "precision": 0.9238444947561598,
+     "n_changed": 634268,
+     "collateral": 0.0834425468722873,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.345100530367553,
+      "attn.c_proj": 0.31525700490598196,
+      "mlp.c_fc": 0.3455275955003641,
+      "mlp.c_proj": 0.32741420278151556,
+      "wpe": 0.2601368989404147,
+      "wte": 0.29033223091050003
+     },
+     "recovery": 0.9787504520611293,
+     "status": "ok"
+    },
+    "fable": {
+     "wikitext2_nll": 4.393882115681966,
+     "wikitext2_ppl": 80.95408286140598,
+     "wikitext2_top1": 0.29089042467948717,
+     "blimp_acc": 0.7280597014925373,
+     "capitals_acc": 0.45,
+     "residual": 0.1555692526562381,
+     "recall": 0.9999895481336585,
+     "precision": 0.010015264335278324,
+     "n_changed": 124188834,
+     "collateral": 0.07022243907745562,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.18510294292934568,
+      "attn.c_proj": 0.19198913844365623,
+      "mlp.c_fc": 0.15714424634009988,
+      "mlp.c_proj": 0.1667629076542469,
+      "wpe": 0.019758332429269714,
+      "wte": 0.1232931404042954
+     },
+     "recovery": 0.9972178452789571,
+     "status": "ok"
+    },
+    "opus": {
+     "wikitext2_nll": 7.317803933070256,
+     "wikitext2_ppl": 1506.8910997416638,
+     "wikitext2_top1": 0.0810546875,
+     "blimp_acc": 0.6964179104477612,
+     "capitals_acc": 0.0875,
+     "residual": 0.19812993524550226,
+     "recall": 0.9998954813365847,
+     "precision": 0.010018065216926551,
+     "n_changed": 124142434,
+     "collateral": 0.11543179226682315,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.20933698323593128,
+      "attn.c_proj": 0.20250185055648975,
+      "mlp.c_fc": 0.20700150387476987,
+      "mlp.c_proj": 0.20827206119399966,
+      "wpe": 0.19288696023342572,
+      "wte": 0.1792770066736332
+     },
+     "recovery": 0.9893110511151343,
+     "status": "ok"
+    },
+    "sonnet": {
+     "wikitext2_nll": 107.10633615347055,
+     "wikitext2_ppl": 5.184705528587072e+21,
+     "wikitext2_top1": 0.0,
+     "blimp_acc": 0.533134328358209,
+     "capitals_acc": 0.0125,
+     "residual": 0.28251742028510024,
+     "recall": 0.9603054196142939,
+     "precision": 0.009970565659738246,
+     "n_changed": 119795109,
+     "collateral": 0.08696134902554353,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.35640722156222326,
+      "attn.c_proj": 0.3542760842975707,
+      "mlp.c_fc": 0.2741093204817744,
+      "mlp.c_proj": 0.29501120427642713,
+      "wpe": 0.02063241074667958,
+      "wte": 0.22042975352879485
+     },
+     "recovery": 0.7194654692378947,
+     "status": "ok"
+    },
+    "haiku": {
+     "wikitext2_nll": 10.303555072882236,
+     "wikitext2_ppl": 29838.50859123754,
+     "wikitext2_top1": 0.00017528044871794872,
+     "blimp_acc": 0.5053731343283582,
+     "capitals_acc": 0.0125,
+     "residual": 0.8067264331497169,
+     "recall": 0.2961174532500078,
+     "precision": 0.01970561055879592,
+     "n_changed": 18690616,
+     "collateral": 0.49015662771009133,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 1.0,
+      "attn.c_proj": 1.0,
+      "mlp.c_fc": 1.0,
+      "mlp.c_proj": 1.0,
+      "wpe": 1.0,
+      "wte": 0.0862798260773875
+     },
+     "recovery": 0.9812370596881064,
+     "status": "ok"
+    },
+    "colmean_zero": {
+     "wikitext2_nll": 373.1636962890625,
+     "wikitext2_ppl": 5.184705528587072e+21,
+     "wikitext2_top1": 0.0,
+     "blimp_acc": 0.5023880597014926,
+     "capitals_acc": 0.0125,
+     "residual": 1.0,
+     "recall": 0.0,
+     "precision": NaN,
+     "n_changed": 0,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 1.0,
+      "attn.c_proj": 1.0,
+      "mlp.c_fc": 1.0,
+      "mlp.c_proj": 1.0,
+      "wpe": 1.0,
+      "wte": 1.0
+     },
+     "recovery": 0.0,
+     "status": "ok"
+    },
+    "oracle_colmean": {
+     "wikitext2_nll": 3.425379086763431,
+     "wikitext2_ppl": 30.73429360730878,
+     "wikitext2_top1": 0.38822115384615385,
+     "blimp_acc": 0.8116417910447761,
+     "capitals_acc": 0.7125,
+     "residual": 0.09515014340820965,
+     "recall": 1.0,
+     "precision": 1.0,
+     "n_changed": 1243797,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.09982920050764824,
+      "attn.c_proj": 0.10040540105378973,
+      "mlp.c_fc": 0.10021969022292995,
+      "mlp.c_proj": 0.0993119475246224,
+      "wpe": 0.09868129529438148,
+      "wte": 0.0858606313254532
+     },
+     "recovery": 0.9998368462560548,
+     "status": "ok"
+    }
+   }
+  },
+  "C": {
+   "condition": "block_zero",
+   "damaged": {
+    "wikitext2_nll": 5.980590037810496,
+    "wikitext2_ppl": 395.6737617730905,
+    "wikitext2_top1": 0.2744641426282051,
+    "blimp_acc": 0.586865671641791,
+    "capitals_acc": 0.025,
+    "n_damaged": 1245860,
+    "frac_of_model": 0.010011748009125826
+   },
+   "repairs": {
+    "heuristic": {
+     "wikitext2_nll": 9.61740892361372,
+     "wikitext2_ppl": 15024.070945984622,
+     "wikitext2_top1": 0.014423076923076924,
+     "blimp_acc": 0.5770149253731344,
+     "capitals_acc": 0.0125,
+     "residual": 0.951084142558967,
+     "recall": 1.0,
+     "precision": 0.9627789262185815,
+     "n_changed": 1294025,
+     "collateral": 0.08452762741978787,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 1.000538975678363,
+      "attn.c_proj": 1.000606648596321,
+      "mlp.c_fc": 1.0006819639759172,
+      "mlp.c_proj": 0.998087668554218,
+      "wpe": 1.0090205873648828,
+      "wte": 0.8590943800336246
+     },
+     "recovery": -1.3904631371136376,
+     "status": "ok"
+    },
+    "fable": {
+     "wikitext2_nll": 3.427334088545579,
+     "wikitext2_ppl": 30.79443797810403,
+     "wikitext2_top1": 0.3896233974358974,
+     "blimp_acc": 0.8283582089552238,
+     "capitals_acc": 0.55,
+     "residual": 0.8335723021436279,
+     "recall": 1.0,
+     "precision": 1.0,
+     "n_changed": 1245860,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.9078946108445757,
+      "attn.c_proj": 0.9724028258745896,
+      "mlp.c_fc": 0.9164733011532336,
+      "mlp.c_proj": 0.9466851707836668,
+      "wpe": 0.07181576111469268,
+      "wte": 0.6428472607497157
+     },
+     "recovery": 0.9761850640755405,
+     "status": "ok"
+    },
+    "opus": {
+     "wikitext2_nll": 3.430660987511659,
+     "wikitext2_ppl": 30.897058571494856,
+     "wikitext2_top1": 0.3893729967948718,
+     "blimp_acc": 0.8277611940298507,
+     "capitals_acc": 0.5375,
+     "residual": 0.8397355993870783,
+     "recall": 0.9619901112484549,
+     "precision": 1.0,
+     "n_changed": 1198505,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.9083967787120122,
+      "attn.c_proj": 0.9766327144015959,
+      "mlp.c_fc": 0.9168345181373646,
+      "mlp.c_proj": 0.9484061057513177,
+      "wpe": 0.07832399682146853,
+      "wte": 0.661805474714964
+     },
+     "recovery": 0.9749130924656003,
+     "status": "ok"
+    },
+    "sonnet": {
+     "wikitext2_nll": 3.4355097795144105,
+     "wikitext2_ppl": 31.047235776789005,
+     "wikitext2_top1": 0.3877203525641026,
+     "blimp_acc": 0.8292537313432836,
+     "capitals_acc": 0.5125,
+     "residual": 0.8737018872319741,
+     "recall": 1.0,
+     "precision": 1.0,
+     "n_changed": 1245860,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.9130044133153595,
+      "attn.c_proj": 1.0187453512428253,
+      "mlp.c_fc": 0.9192136123128168,
+      "mlp.c_proj": 0.9542820443477047,
+      "wpe": 0.7648254691577407,
+      "wte": 0.7542069798517393
+     },
+     "recovery": 0.9730592562556984,
+     "status": "ok"
+    },
+    "haiku": {
+     "wikitext2_nll": 3.4307738756522155,
+     "wikitext2_ppl": 30.90054667986498,
+     "wikitext2_top1": 0.3886969150641026,
+     "blimp_acc": 0.8256716417910448,
+     "capitals_acc": 0.5,
+     "residual": 0.8629031695087304,
+     "recall": 1.0,
+     "precision": 1.0,
+     "n_changed": 1245860,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.9111305168030814,
+      "attn.c_proj": 0.9663153561454776,
+      "mlp.c_fc": 0.9160761777062637,
+      "mlp.c_proj": 0.9468091231248528,
+      "wpe": 0.07716490791496383,
+      "wte": 0.7410705789139101
+     },
+     "recovery": 0.9748699319995475,
+     "status": "ok"
+    },
+    "colmean_zero": {
+     "wikitext2_nll": 3.4555650429847913,
+     "wikitext2_ppl": 31.676182030984773,
+     "wikitext2_top1": 0.38651842948717946,
+     "blimp_acc": 0.8244776119402986,
+     "capitals_acc": 0.4125,
+     "residual": 0.951066456813394,
+     "recall": 1.0,
+     "precision": 1.0,
+     "n_changed": 1245860,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 1.0005427283249724,
+      "attn.c_proj": 1.0006061595161124,
+      "mlp.c_fc": 1.0006862636008365,
+      "mlp.c_proj": 0.9980736546371017,
+      "wpe": 1.0090089245074698,
+      "wte": 0.8590451094678354
+     },
+     "recovery": 0.9653915374508046,
+     "status": "ok"
+    },
+    "oracle_colmean": {
+     "wikitext2_nll": 3.4555650429847913,
+     "wikitext2_ppl": 31.676182030984773,
+     "wikitext2_top1": 0.38651842948717946,
+     "blimp_acc": 0.8244776119402986,
+     "capitals_acc": 0.4125,
+     "residual": 0.951066456813394,
+     "recall": 1.0,
+     "precision": 1.0,
+     "n_changed": 1245860,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 1.0005427283249724,
+      "attn.c_proj": 1.0006061595161124,
+      "mlp.c_fc": 1.0006862636008365,
+      "mlp.c_proj": 0.9980736546371017,
+      "wpe": 1.0090089245074698,
+      "wte": 0.8590451094678354
+     },
+     "recovery": 0.9653915374508046,
+     "status": "ok"
+    }
+   }
+  },
+  "D": {
+   "condition": "block_noise",
+   "damaged": {
+    "wikitext2_nll": 3.78215967080532,
+    "wikitext2_ppl": 43.910772218223855,
+    "wikitext2_top1": 0.3518379407051282,
+    "blimp_acc": 0.8023880597014925,
+    "capitals_acc": 0.4625,
+    "n_damaged": 1245860,
+    "frac_of_model": 0.010011748009125826
+   },
+   "repairs": {
+    "heuristic": {
+     "wikitext2_nll": 9.878025421729454,
+     "wikitext2_ppl": 19497.18590803724,
+     "wikitext2_top1": 0.01397235576923077,
+     "blimp_acc": 0.535223880597015,
+     "capitals_acc": 0.0125,
+     "residual": 0.9973055680536598,
+     "recall": 0.006178061740484485,
+     "precision": 0.13524626170687565,
+     "n_changed": 56911,
+     "collateral": 0.08422657752788028,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.9983858189898926,
+      "attn.c_proj": 0.9851190553220496,
+      "mlp.c_fc": 0.9999145030129972,
+      "mlp.c_proj": 0.9986349957336599,
+      "wpe": 0.5911154119840714,
+      "wte": 0.9990650751156822
+     },
+     "recovery": -14.61436612528537,
+     "status": "ok"
+    },
+    "fable": {
+     "wikitext2_nll": 3.419177238757794,
+     "wikitext2_ppl": 30.544274035106625,
+     "wikitext2_top1": 0.3883463541666667,
+     "blimp_acc": 0.8280597014925373,
+     "capitals_acc": 0.6,
+     "residual": 0.617782933004191,
+     "recall": 0.992642833063105,
+     "precision": 0.992642833063105,
+     "n_changed": 1245860,
+     "collateral": 0.008696156473432378,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.6515045549420113,
+      "attn.c_proj": 0.7063474298132321,
+      "mlp.c_fc": 0.652910194364345,
+      "mlp.c_proj": 0.6698748159825575,
+      "wpe": 0.04410146987326286,
+      "wte": 0.5354487171463604
+     },
+     "recovery": 0.8702222745284144,
+     "status": "ok"
+    },
+    "opus": {
+     "wikitext2_nll": 3.6475466887156167,
+     "wikitext2_ppl": 38.380391406457896,
+     "wikitext2_top1": 0.36733774038461536,
+     "blimp_acc": 0.8149253731343283,
+     "capitals_acc": 0.425,
+     "residual": 0.901892467254801,
+     "recall": 0.3761457948726181,
+     "precision": 0.5404079250987985,
+     "n_changed": 867169,
+     "collateral": 0.04935274254555216,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.9811176879546148,
+      "attn.c_proj": 0.9936379249825547,
+      "mlp.c_fc": 0.8940345973304664,
+      "mlp.c_proj": 0.8003161857400329,
+      "wpe": 0.5814007457628559,
+      "wte": 0.907686621114024
+     },
+     "recovery": 0.32272420126331725,
+     "status": "ok"
+    },
+    "sonnet": {
+     "wikitext2_nll": 3.777727958483574,
+     "wikitext2_ppl": 43.71660287704945,
+     "wikitext2_top1": 0.35228866185897434,
+     "blimp_acc": 0.7982089552238806,
+     "capitals_acc": 0.4375,
+     "residual": 0.9963440192686284,
+     "recall": 0.3152649575393704,
+     "precision": 0.010174654945307499,
+     "n_changed": 38603373,
+     "collateral": 0.009266571055943352,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 1.0,
+      "attn.c_proj": 1.0,
+      "mlp.c_fc": 1.0,
+      "mlp.c_proj": 1.0,
+      "wpe": 0.6639955972290843,
+      "wte": 0.992503098464416
+     },
+     "recovery": 0.010624687136870458,
+     "status": "ok"
+    },
+    "haiku": {
+     "wikitext2_nll": 3.78215967080532,
+     "wikitext2_ppl": 43.910772218223855,
+     "wikitext2_top1": 0.3518379407051282,
+     "blimp_acc": 0.8023880597014925,
+     "capitals_acc": 0.4625,
+     "residual": 1.0,
+     "recall": 0.0,
+     "precision": NaN,
+     "n_changed": 0,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 1.0,
+      "attn.c_proj": 1.0,
+      "mlp.c_fc": 1.0,
+      "mlp.c_proj": 1.0,
+      "wpe": 1.0,
+      "wte": 1.0
+     },
+     "recovery": 0.0,
+     "status": "ok"
+    },
+    "colmean_zero": {
+     "wikitext2_nll": 3.78215967080532,
+     "wikitext2_ppl": 43.910772218223855,
+     "wikitext2_top1": 0.3518379407051282,
+     "blimp_acc": 0.8023880597014925,
+     "capitals_acc": 0.4625,
+     "residual": 1.0,
+     "recall": 0.0,
+     "precision": NaN,
+     "n_changed": 0,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 1.0,
+      "attn.c_proj": 1.0,
+      "mlp.c_fc": 1.0,
+      "mlp.c_proj": 1.0,
+      "wpe": 1.0,
+      "wte": 1.0
+     },
+     "recovery": 0.0,
+     "status": "ok"
+    },
+    "oracle_colmean": {
+     "wikitext2_nll": 3.430039778733865,
+     "wikitext2_ppl": 30.877871007860733,
+     "wikitext2_top1": 0.38787059294871795,
+     "blimp_acc": 0.8250746268656717,
+     "capitals_acc": 0.5,
+     "residual": 0.6728126856886004,
+     "recall": 1.0,
+     "precision": 1.0,
+     "n_changed": 1245860,
+     "collateral": 0.0,
+     "non_matrix_entries_changed": 0,
+     "residual_by_group": {
+      "attn.c_attn": 0.6942491621119048,
+      "attn.c_proj": 0.708847708622274,
+      "mlp.c_fc": 0.7081261538527045,
+      "mlp.c_proj": 0.700901041650559,
+      "wpe": 0.44054884286228724,
+      "wte": 0.6203803641465605
+     },
+     "recovery": 0.8441801760394865,
+     "status": "ok"
+    }
+   }
+  }
+ }
+}

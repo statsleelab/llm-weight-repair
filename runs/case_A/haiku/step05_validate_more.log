@@ -1,0 +1,16 @@
+== h.0.attn.c_proj.weight (768, 768) hidden=5905 zero-fill RMSE=0.1576
+   rank    8: ratio=0.952 iters=40 t=3.8s
+   rank   16: ratio=1.090 iters=40 t=3.8s
+   rank   32: ratio=1.900 iters=40 t=3.9s
+   rank   64: ratio=2.613 iters=40 t=3.8s
+   rank   96: ratio=3.130 iters=40 t=3.7s
+== h.0.mlp.c_fc.weight (768, 3072) hidden=23377 zero-fill RMSE=0.1400
+   rank    8: ratio=0.967 iters=22 t=4.0s
+   rank   16: ratio=0.969 iters=40 t=6.7s
+   rank   32: ratio=0.980 iters=40 t=6.8s
+   rank   64: ratio=1.021 iters=40 t=6.8s
+   rank  128: ratio=1.142 iters=40 t=7.6s
+== wte.weight (12000, 768) hidden=91498 zero-fill RMSE=0.1347
+   rank    8: ratio=0.856 iters=20 t=9.3s
+   rank   16: ratio=0.848 iters=18 t=8.9s
+   rank   32: ratio=0.843 iters=29 t=18.8s

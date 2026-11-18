@@ -1,0 +1,302 @@
+{
+"h.0.attn.c_attn.weight": [
+267,
+344,
+1375,
+1605
+],
+"h.0.attn.c_proj.weight": [
+97,
+174,
+649,
+726
+],
+"h.0.mlp.c_fc.weight": [
+482,
+559,
+1972,
+2279
+],
+"h.0.mlp.c_proj.weight": [
+1532,
+1839,
+517,
+594
+],
+"h.1.attn.c_attn.weight": [
+33,
+110,
+1651,
+1881
+],
+"h.1.attn.c_proj.weight": [
+234,
+311,
+213,
+290
+],
+"h.1.mlp.c_fc.weight": [
+9,
+86,
+282,
+589
+],
+"h.1.mlp.c_proj.weight": [
+1327,
+1634,
+2,
+79
+],
+"h.10.attn.c_attn.weight": [
+622,
+699,
+1934,
+2164
+],
+"h.10.attn.c_proj.weight": [
+419,
+496,
+238,
+315
+],
+"h.10.mlp.c_fc.weight": [
+459,
+536,
+2315,
+2622
+],
+"h.10.mlp.c_proj.weight": [
+758,
+1065,
+194,
+271
+],
+"h.11.attn.c_attn.weight": [
+266,
+343,
+227,
+457
+],
+"h.11.attn.c_proj.weight": [
+375,
+452,
+514,
+591
+],
+"h.11.mlp.c_fc.weight": [
+55,
+132,
+717,
+1024
+],
+"h.11.mlp.c_proj.weight": [
+2188,
+2495,
+625,
+702
+],
+"h.2.attn.c_attn.weight": [
+458,
+535,
+65,
+295
+],
+"h.2.attn.c_proj.weight": [
+148,
+225,
+401,
+478
+],
+"h.2.mlp.c_fc.weight": [
+646,
+723,
+845,
+1152
+],
+"h.2.mlp.c_proj.weight": [
+2370,
+2677,
+56,
+133
+],
+"h.3.attn.c_attn.weight": [
+147,
+224,
+1932,
+2162
+],
+"h.3.attn.c_proj.weight": [
+506,
+583,
+166,
+243
+],
+"h.3.mlp.c_fc.weight": [
+389,
+466,
+2243,
+2550
+],
+"h.3.mlp.c_proj.weight": [
+1421,
+1728,
+606,
+683
+],
+"h.4.attn.c_attn.weight": [
+299,
+376,
+804,
+1034
+],
+"h.4.attn.c_proj.weight": [
+364,
+441,
+388,
+465
+],
+"h.4.mlp.c_fc.weight": [
+477,
+554,
+2016,
+2323
+],
+"h.4.mlp.c_proj.weight": [
+165,
+472,
+77,
+154
+],
+"h.5.attn.c_attn.weight": [
+253,
+330,
+1526,
+1756
+],
+"h.5.attn.c_proj.weight": [
+126,
+203,
+608,
+685
+],
+"h.5.mlp.c_fc.weight": [
+237,
+314,
+697,
+1004
+],
+"h.5.mlp.c_proj.weight": [
+2403,
+2710,
+431,
+508
+],
+"h.6.attn.c_attn.weight": [
+211,
+288,
+239,
+469
+],
+"h.6.attn.c_proj.weight": [
+362,
+439,
+508,
+585
+],
+"h.6.mlp.c_fc.weight": [
+275,
+352,
+1552,
+1859
+],
+"h.6.mlp.c_proj.weight": [
+1940,
+2247,
+639,
+716
+],
+"h.7.attn.c_attn.weight": [
+368,
+445,
+1194,
+1424
+],
+"h.7.attn.c_proj.weight": [
+210,
+287,
+219,
+296
+],
+"h.7.mlp.c_fc.weight": [
+148,
+225,
+604,
+911
+],
+"h.7.mlp.c_proj.weight": [
+1408,
+1715,
+457,
+534
+],
+"h.8.attn.c_attn.weight": [
+43,
+120,
+1732,
+1962
+],
+"h.8.attn.c_proj.weight": [
+273,
+350,
+478,
+555
+],
+"h.8.mlp.c_fc.weight": [
+59,
+136,
+480,
+787
+],
+"h.8.mlp.c_proj.weight": [
+536,
+843,
+625,
+702
+],
+"h.9.attn.c_attn.weight": [
+145,
+222,
+1606,
+1836
+],
+"h.9.attn.c_proj.weight": [
+278,
+355,
+683,
+760
+],
+"h.9.mlp.c_fc.weight": [
+439,
+516,
+2307,
+2614
+],
+"h.9.mlp.c_proj.weight": [
+354,
+661,
+116,
+193
+],
+"wpe.weight": [
+151,
+253,
+59,
+136
+],
+"wte.weight": [
+32789,
+37815,
+584,
+661
+]
+}

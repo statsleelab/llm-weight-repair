@@ -1,0 +1,122 @@
+{
+ "h.6.attn.c_attn.weight": {
+  "lam": 1.0,
+  "alpha": 1.267,
+  "cv_r2": 0.254
+ },
+ "h.6.attn.c_proj.weight": {
+  "lam": 1.0,
+  "alpha": 1.182,
+  "cv_r2": 0.261
+ },
+ "h.6.mlp.c_fc.weight": {
+  "lam": 1.0,
+  "alpha": 1.131,
+  "cv_r2": 0.196
+ },
+ "h.6.mlp.c_proj.weight": {
+  "lam": 1.0,
+  "alpha": 1.005,
+  "cv_r2": 0.126
+ },
+ "h.7.attn.c_attn.weight": {
+  "lam": 1.0,
+  "alpha": 1.247,
+  "cv_r2": 0.248
+ },
+ "h.7.attn.c_proj.weight": {
+  "lam": 1.0,
+  "alpha": 1.011,
+  "cv_r2": 0.159
+ },
+ "h.7.mlp.c_fc.weight": {
+  "lam": 1.0,
+  "alpha": 1.108,
+  "cv_r2": 0.189
+ },
+ "h.7.mlp.c_proj.weight": {
+  "lam": 1.0,
+  "alpha": 1.065,
+  "cv_r2": 0.153
+ },
+ "h.8.attn.c_attn.weight": {
+  "lam": 1.0,
+  "alpha": 1.049,
+  "cv_r2": 0.14
+ },
+ "h.8.attn.c_proj.weight": {
+  "lam": 1.0,
+  "alpha": 1.08,
+  "cv_r2": 0.205
+ },
+ "h.8.mlp.c_fc.weight": {
+  "lam": 1.0,
+  "alpha": 1.082,
+  "cv_r2": 0.167
+ },
+ "h.8.mlp.c_proj.weight": {
+  "lam": 1.0,
+  "alpha": 1.083,
+  "cv_r2": 0.145
+ },
+ "h.9.attn.c_attn.weight": {
+  "lam": 1.0,
+  "alpha": 0.845,
+  "cv_r2": 0.08
+ },
+ "h.9.attn.c_proj.weight": {
+  "lam": 10.0,
+  "alpha": 1.433,
+  "cv_r2": 0.064
+ },
+ "h.9.mlp.c_fc.weight": {
+  "lam": 1.0,
+  "alpha": 1.087,
+  "cv_r2": 0.171
+ },
+ "h.9.mlp.c_proj.weight": {
+  "lam": 1.0,
+  "alpha": 1.057,
+  "cv_r2": 0.131
+ },
+ "h.10.attn.c_attn.weight": {
+  "lam": 1.0,
+  "alpha": 1.022,
+  "cv_r2": 0.141
+ },
+ "h.10.attn.c_proj.weight": {
+  "lam": 10.0,
+  "alpha": 0.906,
+  "cv_r2": 0.041
+ },
+ "h.10.mlp.c_fc.weight": {
+  "lam": 1.0,
+  "alpha": 1.125,
+  "cv_r2": 0.19
+ },
+ "h.10.mlp.c_proj.weight": {
+  "lam": 1.0,
+  "alpha": 0.905,
+  "cv_r2": 0.091
+ },
+ "h.11.attn.c_attn.weight": {
+  "lam": 1.0,
+  "alpha": 1.046,
+  "cv_r2": 0.151
+ },
+ "h.11.attn.c_proj.weight": {
+  "lam": 10.0,
+  "alpha": 1.091,
+  "cv_r2": 0.121
+ },
+ "h.11.mlp.c_fc.weight": {
+  "lam": 1.0,
+  "alpha": 1.106,
+  "cv_r2": 0.199
+ },
+ "h.11.mlp.c_proj.weight": {
+  "lam": 1.0,
+  "alpha": 0.929,
+  "cv_r2": 0.103
+ }
+}
