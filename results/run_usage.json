@@ -1,5 +1,157 @@
-{"_note": "Sub-agent usage as reported by the harness at completion. tokens = total sub-agent tokens; minutes = wall clock (4 agents shared 4 CPU cores).",
- "A": {"fable": {"tokens": 109686, "tool_calls": 25, "minutes": 20.2}, "opus": {"tokens": 98574, "tool_calls": 20, "minutes": 13.1}, "sonnet": {"tokens": 82634, "tool_calls": 31, "minutes": 9.7}, "haiku": {"tokens": 172664, "tool_calls": 101, "minutes": 11.6}},
- "B": {"fable": {"tokens": 140667, "tool_calls": 22, "minutes": 27.0}, "opus": {"tokens": 140303, "tool_calls": 39, "minutes": 78.3}, "sonnet": {"tokens": 114089, "tool_calls": 36, "minutes": 16.7}, "haiku": {"tokens": 119474, "tool_calls": 22, "minutes": 14.0}},
- "C": {"fable": {"tokens": 86712, "tool_calls": 9, "minutes": 11.7}, "opus": {"tokens": 86263, "tool_calls": 11, "minutes": 13.7}, "sonnet": {"tokens": 73120, "tool_calls": 13, "minutes": 8.4}, "haiku": {"tokens": 106690, "tool_calls": 11, "minutes": 5.8}},
- "D": {"fable": {"tokens": 153684, "tool_calls": 21, "minutes": 25.1}, "opus": {"tokens": 109091, "tool_calls": 22, "minutes": 8.3}, "sonnet": {"tokens": 94080, "tool_calls": 20, "minutes": 15.8}, "haiku": {"tokens": 108849, "tool_calls": 19, "minutes": 8.9}}}
+{
+ "_note": "Sub-agent usage as reported by the harness at completion. tokens = total sub-agent tokens; minutes = wall clock (4 agents shared 4 CPU cores).",
+ "A": {
+  "fable": {
+   "tokens": 109686,
+   "tool_calls": 25,
+   "minutes": 20.2
+  },
+  "opus": {
+   "tokens": 98574,
+   "tool_calls": 20,
+   "minutes": 13.1
+  },
+  "sonnet": {
+   "tokens": 82634,
+   "tool_calls": 31,
+   "minutes": 9.7
+  },
+  "haiku": {
+   "tokens": 172664,
+   "tool_calls": 101,
+   "minutes": 11.6
+  }
+ },
+ "B": {
+  "fable": {
+   "tokens": 140667,
+   "tool_calls": 22,
+   "minutes": 27.0
+  },
+  "opus": {
+   "tokens": 140303,
+   "tool_calls": 39,
+   "minutes": 78.3
+  },
+  "sonnet": {
+   "tokens": 114089,
+   "tool_calls": 36,
+   "minutes": 16.7
+  },
+  "haiku": {
+   "tokens": 119474,
+   "tool_calls": 22,
+   "minutes": 14.0
+  }
+ },
+ "C": {
+  "fable": {
+   "tokens": 86712,
+   "tool_calls": 9,
+   "minutes": 11.7
+  },
+  "opus": {
+   "tokens": 86263,
+   "tool_calls": 11,
+   "minutes": 13.7
+  },
+  "sonnet": {
+   "tokens": 73120,
+   "tool_calls": 13,
+   "minutes": 8.4
+  },
+  "haiku": {
+   "tokens": 106690,
+   "tool_calls": 11,
+   "minutes": 5.8
+  }
+ },
+ "D": {
+  "fable": {
+   "tokens": 153684,
+   "tool_calls": 21,
+   "minutes": 25.1
+  },
+  "opus": {
+   "tokens": 109091,
+   "tool_calls": 22,
+   "minutes": 8.3
+  },
+  "sonnet": {
+   "tokens": 94080,
+   "tool_calls": 20,
+   "minutes": 15.8
+  },
+  "haiku": {
+   "tokens": 108849,
+   "tool_calls": 19,
+   "minutes": 8.9
+  }
+ },
+ "E": {
+  "fable": {
+   "tokens": 125996,
+   "tool_calls": 25,
+   "minutes": 29.7
+  },
+  "opus": {
+   "tokens": 108012,
+   "tool_calls": 24,
+   "minutes": 20.3
+  },
+  "sonnet": {
+   "tokens": 107423,
+   "tool_calls": 37,
+   "minutes": 20.0
+  },
+  "haiku": {
+   "tokens": 113282,
+   "tool_calls": 19,
+   "minutes": 12.0
+  }
+ },
+ "F": {
+  "fable": {
+   "tokens": 135271,
+   "tool_calls": 34,
+   "minutes": 29.4
+  },
+  "opus": {
+   "tokens": 119411,
+   "tool_calls": 28,
+   "minutes": 21.4
+  },
+  "sonnet": {
+   "tokens": 121262,
+   "tool_calls": 43,
+   "minutes": 22.2
+  },
+  "haiku": {
+   "tokens": 121470,
+   "tool_calls": 24,
+   "minutes": 11.6
+  }
+ },
+ "G": {
+  "fable": {
+   "tokens": 171163,
+   "tool_calls": 31,
+   "minutes": 20.5
+  },
+  "opus": {
+   "tokens": 107142,
+   "tool_calls": 21,
+   "minutes": 12.9
+  },
+  "sonnet": {
+   "tokens": 123567,
+   "tool_calls": 32,
+   "minutes": 6.8
+  },
+  "haiku": {
+   "tokens": 121180,
+   "tool_calls": 16,
+   "minutes": 5.7
+  }
+ }
+}

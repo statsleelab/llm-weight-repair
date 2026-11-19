@@ -6,7 +6,7 @@ import argparse, json, math
 from pathlib import Path
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--author", default="StatsLeeLab")
+ap.add_argument("--author", default="Donghyung Lee")
 ap.add_argument("--affiliation", default="Miami University")
 a = ap.parse_args()
 root = Path(__file__).resolve().parent.parent
@@ -22,7 +22,12 @@ def clean(o):  # NaN/inf are not valid JSON for the browser
     return o
 
 
-data = clean(json.loads((root / "results/results.json").read_text()))
+data = json.loads((root / "results/results.json").read_text())
+dose = json.loads((root / "results/dose_response.json").read_text())
+keep = ("damaged", "auto", "oracle_ridge")
+data["dose"] = {"clean": dose["clean"], "cells": {k: {"methods": {m: {"nll": v["methods"][m]["nll"]} for m in keep}} for k, v in dose["cells"].items()}}
+data["lite"] = json.loads((root / "results/llm_lite.json").read_text())
+data = clean(data)
 frag = (root / "page/page.html").read_text()
 frag = frag.replace("/*DATA*/null", json.dumps(data, separators=(",", ":")))
 frag = frag.replace("__AUTHOR__", a.author).replace("__AFFILIATION__", a.affiliation)

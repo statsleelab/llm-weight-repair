@@ -1,0 +1,39 @@
+v4 t=4.2 protect=6.0 t_wpe=6 ppl 75.962 acc 0.2812
+v4 t=4.2 protect=1000000000.0 t_wpe=6 ppl 4658.744 acc 0.0218
+v4 t=3.5 protect=4.2 t_wpe=6 ppl 93.116 acc 0.2669
+v4 t=4.2 protect=4.2 t_wpe=1000000000.0 ppl 86.708 acc 0.2676
+v5 {'t': 4.2} ppl 62.129 acc 0.3278
+v5 {'t': 5.0} ppl 61.882 acc 0.3265
+v5 {'t': 4.2, 'protect': 3.0} ppl 68.041 acc 0.3132
+v5 {'t': 4.2, 'margin': 1.0} ppl 89.114 acc 0.2663
+hidden norms pos0: [10.3, 49.8, 66.4, 1025.5, 956.2, 897.5, 836.3, 798.5, 776.8, 751.8, 732.2, 704.3, 501.5]
+v5 {'t': 4.2, 'margin': 1.7} ppl 99.246 acc 0.2939
+v5 {'t': 4.2, 'margin': 2.2} ppl 81.668 acc 0.3092
+v5 {'t': 4.2, 'margin': 3.0} ppl 131.735 acc 0.2487
+v5 {'t': 5, 'margin': 2.2, 'protect': 5.0} ppl 78.736 acc 0.3145
+hidden norms pos0: [10.3, 56.3, 143.0, 1121.1, 1050.3, 1000.0, 944.1, 909.7, 889.7, 859.2, 839.1, 818.6, 415.6]
+family wte {'margin': 1.0} ppl 79.352 acc 0.2803
+family wte {'margin': 1.7} ppl 62.471 acc 0.3268
+family writer {'margin': 1.0} ppl 57.448 acc 0.3288
+family writer {'margin': 1.7} ppl 67.361 acc 0.3161
+family reader {'margin': 1.0} ppl 83.894 acc 0.2852
+family reader {'margin': 1.7} ppl 79.560 acc 0.3027
+attn {'tb': 5, 't': 4.2, 'margin': 1.3} other {'wte': {'t': 4.2, 'margin': 1.3}, 'writer': {'t': 4.2, 'margin': 1.3}, 'reader': {'t': 4.2, 'margin': 1.3}} ppl 64.291 acc 0.3167
+attn {'tb': 5, 't': 4.2, 'margin': 0.0} other {'wte': {'t': 4.2, 'margin': 1.3}, 'writer': {'t': 4.2, 'margin': 1.3}, 'reader': {'t': 4.2, 'margin': 1.3}} ppl 61.525 acc 0.3184
+attn {'tb': 7, 't': 4.2, 'margin': 0.0} other {'wte': {'t': 4.2, 'margin': 1.3}, 'writer': {'t': 4.2, 'margin': 1.3}, 'reader': {'t': 4.2, 'margin': 1.3}} ppl 58.906 acc 0.3164
+hot dims [64, 87, 138, 266, 373, 447, 480] [16.0, 14.0, 12.0, 16.0, 13.0, 85.0, 18.0]
+v6 {'wte': {'t': 4.2, 'margin': 1.3}, 'writer': {'t': 4.2, 'margin': 1.3}, 'reader': {'t': 4.2, 'margin': 1.3}} ppl 55.142 acc 0.3346
+   pos0 norms: [10, 111, 697, 1569, 1790, 2114, 2287, 2381, 2440, 2469, 2492, 2514, 431]
+v6 {'wte': {'t': 4.2, 'margin': 1.3}, 'writer': {'t': 4.2, 'margin': 1.0}, 'reader': {'t': 4.2, 'margin': 1.3}} ppl 52.319 acc 0.3363
+   pos0 norms: [10, 105, 693, 1552, 1780, 2111, 2277, 2373, 2428, 2458, 2482, 2499, 471]
+v6 {'wte': {'t': 4.2, 'margin': 1.3}, 'writer': {'t': 4.2, 'margin': 1.3, 'plevel': 1.5}, 'reader': {'t': 4.2, 'margin': 1.3}} ppl 60.992 acc 0.3180
+   pos0 norms: [10, 132, 662, 1561, 1764, 2072, 2237, 2328, 2384, 2421, 2444, 2461, 428]
+hot dims [64, 87, 138, 266, 373, 447, 480] [16.0, 14.0, 12.0, 16.0, 13.0, 85.0, 18.0]
+v6 {'wte': {'t': 4.2, 'margin': 1.3}, 'writer': {'t': 4.2, 'margin': 1.0, 'plevel': 3.5}, 'reader': {'t': 4.2, 'margin': 1.3}} ppl 46.936 acc 0.3447
+v6 {'wte': {'t': 4.2, 'margin': 1.3}, 'writer': {'t': 4.2, 'margin': 1.0}, 'reader': {'t': 5.0, 'margin': 1.3}} ppl 51.687 acc 0.3428
+v6 {'wte': {'t': 3.5, 'margin': 1.3}, 'writer': {'t': 4.2, 'margin': 1.0}, 'reader': {'t': 4.2, 'margin': 1.3}} ppl 52.325 acc 0.3359
+v6 {'wte': {'t': 4.2, 'margin': 1.3}, 'writer': {'t': 3.5, 'margin': 1.0}, 'reader': {'t': 4.2, 'margin': 1.3}} ppl 52.249 acc 0.3408
+hot dims [64, 87, 138, 266, 373, 447, 480] [16.0, 14.0, 12.0, 16.0, 13.0, 85.0, 18.0]
+v6 {'wte': {'t': 4.2, 'margin': 1.3}, 'writer': {'t': 4.2, 'margin': 1.0, 'plevel': 4.5}, 'reader': {'t': 4.2, 'margin': 1.3}} ppl 46.806 acc 0.3480
+v6 {'wte': {'t': 4.2, 'margin': 1.3}, 'writer': {'t': 4.2, 'margin': 1.0, 'plevel': 6.0}, 'reader': {'t': 4.2, 'margin': 1.3}} ppl 47.267 acc 0.3457
+v6 {'wte': {'t': 4.2, 'margin': 1.3}, 'writer': {'t': 4.2, 'margin': 1.0, 'plevel': 3.5}, 'reader': {'t': 5.0, 'margin': 1.3}} ppl 47.188 acc 0.3444

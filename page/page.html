@@ -89,7 +89,7 @@ footer{border-top:1px solid var(--rule);padding-top:1.25rem;color:var(--ink-3);f
     </div>
   </div>
   <h1><span class="en">Can a frontier LLM repair a damaged language model by editing its weights, without seeing the original?</span><span class="ko">프런티어 LLM은 원본을 보지 않고, 가중치를 직접 고쳐서 손상된 언어 모델을 복구할 수 있는가?</span></h1>
-  <p class="byline">__AUTHOR__ · __AFFILIATION__ · <span class="num">2026-11-18</span> ·
+  <p class="byline">__AUTHOR__ · __AFFILIATION__ · <span class="num">2026-11-19</span> ·
     <a href="https://github.com/statsleelab/llm-weight-repair">statsleelab/llm-weight-repair</a></p>
   <p class="lede en">We corrupted 1% of the weights of GPT-2 (124M) in four different ways, then gave only the corrupted checkpoint to four Claude models. Each had to diagnose the damage and write better weight values by hand: no original weights, no downloads, no gradient training. We then scored the repaired checkpoints on benchmarks the models never saw.</p>
   <p class="lede ko">GPT-2(124M) 가중치의 1%를 네 가지 방식으로 손상시킨 뒤, 손상된 체크포인트만 네 개의 Claude 모델에게 주었습니다. 각 모델은 손상을 스스로 진단하고 더 나은 가중치 값을 직접 써 넣어야 했습니다. 원본 가중치, 다운로드, 그래디언트 학습은 모두 금지했습니다. 복구된 체크포인트는 모델이 보지 못한 벤치마크로 채점했습니다.</p>
@@ -111,12 +111,14 @@ footer{border-top:1px solid var(--rule);padding-top:1.25rem;color:var(--ink-3);f
     <li><strong>Capability mattered where the damage had to be found.</strong> When entries were erased to zero in blocks, all four models repaired equally well. With noise blocks, which nothing marks, only Fable found all of them, and its blind repair (30.5) matched a script that was handed the exact damage mask (30.9). With scattered noise no model came close to that reference (81 against 30.7).</li>
     <li><strong>Erasure does not need a frontier model.</strong> Zeros give the damage away. Filling them with the column mean scores 31.4 and 31.7 in the two erasure conditions, better than Sonnet and Haiku managed on scattered erasure.</li>
     <li><strong>The dominant failure point is the token embedding.</strong> GPT-2's output layer reuses it, and a few of its columns are near-constant offsets with a large gain. One wrong entry there shifts a token's score by tens of nats. Every successful repair fixed this first.</li>
+    <li><strong>A follow-up across doses sharpened this.</strong> Against stronger scripts and from 0.1% to 3% damage, the pattern held: scripts match the best possible repair for erasure, Fable alone matches it for noise blocks, and scattered noise defeats every script while Fable gets part of the way (53.6 at 0.1%, 1,426 at 3%; reduced suite, undamaged 32.2).</li>
     <li><strong>This is one run per model and condition</strong>, on one seed and one small model. Read differences of a few percent as noise.</li>
   </ul>
   <ul class="ko">
     <li><strong>손상을 찾아내야 하는 조건에서 모델 능력 차이가 드러났습니다.</strong> 항목이 블록 단위로 0이 된 경우에는 네 모델이 똑같이 잘 복구했습니다. 아무 표시가 없는 노이즈 블록은 Fable만 전부 찾아냈고, 그 블라인드 복구(30.5)는 정확한 손상 마스크를 받은 스크립트(30.9)와 같은 수준이었습니다. 산발 노이즈에서는 어떤 모델도 그 참조에 가까이 가지 못했습니다(30.7 대비 81).</li>
     <li><strong>소거 손상에는 프런티어 모델이 필요하지 않습니다.</strong> 0이 손상 위치를 드러내기 때문입니다. 0을 열 평균으로 채우기만 해도 두 소거 조건에서 31.4와 31.7이 나오며, 이는 산발 소거에서 Sonnet과 Haiku가 낸 결과보다 좋습니다.</li>
     <li><strong>가장 치명적인 지점은 토큰 임베딩입니다.</strong> GPT-2의 출력층은 토큰 임베딩을 재사용하는데, 그중 몇 개 열은 거의 상수인 오프셋이고 큰 이득이 곱해집니다. 그 열의 항목 하나가 틀리면 해당 토큰의 점수가 수십 nat씩 이동합니다. 성공한 복구는 모두 이것부터 고쳤습니다.</li>
+    <li><strong>용량을 바꾼 후속 실험에서 이 그림이 더 분명해졌습니다.</strong> 더 강한 스크립트와 비교하고 손상을 0.1%에서 3%까지 바꿔도 패턴은 같았습니다. 소거에서는 스크립트가 가능한 최선의 복구와 같고, 노이즈 블록에서는 Fable만 그 수준에 이르며, 산발 노이즈에서는 모든 스크립트가 실패하고 Fable이 일부만 회복합니다(0.1%에서 53.6, 3%에서 1,426. 축소 벤치마크 기준, 손상 전 32.2).</li>
     <li><strong>모델·조건당 실행은 1회</strong>이고, 시드 하나와 작은 모델 하나에 대한 결과입니다. 몇 퍼센트 차이는 잡음으로 읽어야 합니다.</li>
   </ul>
 </section>
@@ -186,6 +188,55 @@ footer{border-top:1px solid var(--rule);padding-top:1.25rem;color:var(--ink-3);f
   </div>
 </section>
 
+<section>
+  <h2 class="col"><span class="en">Follow-up: more damage, stronger scripts</span><span class="ko">후속 실험: 더 큰 손상, 더 강한 스크립트</span></h2>
+  <p class="col en">The first round left two questions open. Is 1% a special dose? And were the scripted baselines too weak to be a fair comparison? We wrote stronger blind scripts, ran them at five doses from 0.1% to 30%, and then sent the four Claude models into the three cells where the scripts fell furthest short.</p>
+  <p class="col ko">첫 실험은 두 가지 질문을 남겼습니다. 1%가 특별한 용량인가? 스크립트 기준선이 공정한 비교가 되기에는 너무 약했던 것 아닌가? 그래서 더 강한 블라인드 스크립트를 만들어 0.1%부터 30%까지 다섯 용량에서 돌렸고, 스크립트가 가장 크게 뒤처진 세 지점에 네 개의 Claude 모델을 투입했습니다.</p>
+  <div class="col" style="display:flex;flex-direction:column;gap:.4rem">
+  <ul class="en">
+    <li><strong>Best blind script.</strong> Four repair pipelines are run and the one with the lowest development perplexity is kept (or none, if nothing helps): ridge imputation of exact zeros; outlier detection with a two-component mixture model in two settings, then ridge imputation; and a rectangle scan for blocks the rest of the matrix cannot predict, then ridge imputation.</li>
+    <li><strong>Ceiling.</strong> The same ridge imputation when the script is told exactly which entries are damaged. No blind method should beat it by much; the gap between a repair and this line is the cost of not knowing where the damage is.</li>
+  </ul>
+  <ul class="ko">
+    <li><strong>최선의 블라인드 스크립트.</strong> 네 가지 복구 파이프라인을 돌려 개발 perplexity가 가장 낮은 것을 고릅니다(아무것도 도움이 안 되면 그대로 둡니다). 정확한 0의 릿지 대치, 두 가지 설정의 2성분 혼합 모형 이상치 탐지 후 릿지 대치, 그리고 행렬의 나머지로 예측되지 않는 직사각형 블록 탐색 후 릿지 대치입니다.</li>
+    <li><strong>상한.</strong> 어떤 항목이 손상됐는지 정확히 알려 준 상태에서 같은 릿지 대치를 한 결과입니다. 블라인드 방법이 이를 크게 넘을 수는 없으므로, 복구 결과와 이 선 사이의 간격이 "손상 위치를 모르는 비용"입니다.</li>
+  </ul>
+  </div>
+  <div class="figure">
+    <div class="legend">
+      <span><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="var(--accent)"/></svg><span class="en">Claude model (F, O, S, H)</span><span class="ko">Claude 모델 (F, O, S, H)</span></span>
+      <span><svg width="22" height="14" aria-hidden="true"><line x1="0" y1="7" x2="22" y2="7" stroke="var(--scripted)" stroke-width="2"/><rect x="6.5" y="2.5" width="9" height="9" fill="var(--scripted)"/></svg><span class="en">Best blind script</span><span class="ko">최선의 블라인드 스크립트</span></span>
+      <span><svg width="22" height="14" aria-hidden="true"><line x1="0" y1="7" x2="22" y2="7" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="4 3"/></svg><span class="en">Ceiling (damage mask known)</span><span class="ko">상한 (손상 마스크 공개)</span></span>
+      <span><svg width="22" height="14" aria-hidden="true"><line x1="0" y1="7" x2="22" y2="7" stroke="var(--clean)" stroke-width="1" stroke-dasharray="1 3"/></svg><span class="en">Undamaged model</span><span class="ko">손상 전 모델</span></span>
+    </div>
+    <div class="panels" id="dosePanels"></div>
+    <p class="cap en">Held-out perplexity against the share of weights damaged; lower is better. Log scale, cut off at 10⁵: anything worse sits on the top edge. Scored on a reduced suite (8,192 WikiText-2 test tokens), so the undamaged model reads 32.2 here instead of 28.9. One run per point, one seed.</p>
+    <p class="cap ko">손상된 가중치 비율에 따른 held-out perplexity. 낮을수록 좋습니다. 로그 스케일이며 10⁵에서 끊었고, 그보다 나쁜 값은 위쪽 끝에 그렸습니다. 축소 벤치마크(WikiText-2 테스트 8,192 토큰)로 채점해 손상 전 모델이 28.9가 아니라 32.2로 나옵니다. 점마다 1회 실행, 시드 하나.</p>
+  </div>
+  <div class="col" style="display:flex;flex-direction:column;gap:.6rem">
+    <h3><span class="en">The cells where nothing marks the damage</span><span class="ko">손상에 아무 표시가 없는 지점들</span></h3>
+  </div>
+  <div class="tablewrap"><table id="doseTable"></table></div>
+  <p class="cap en">Held-out perplexity on the reduced suite. * = checkpoint returned unchanged. The 1% columns re-score the first-round repairs on that suite. Models were told the damaged share (0.1%, 1% or 3%); the scripts were not.</p>
+  <p class="cap ko">축소 벤치마크 기준 held-out perplexity. * = 체크포인트를 그대로 제출. 1% 열은 첫 실험의 복구본을 같은 벤치마크로 다시 채점한 값입니다. 모델에게는 손상 비율(0.1%, 1%, 3%)을 알려 주었고, 스크립트에는 알려 주지 않았습니다.</p>
+  <div class="col" style="display:flex;flex-direction:column;gap:1rem">
+  <ul class="en">
+    <li><strong>Erasure never needed a model.</strong> At every dose the blind script sits on the ceiling, because zeros mark the damage. What degrades is the ceiling itself: about 39–41 at 3%, 180–280 at 10%, unusable at 30%.</li>
+    <li><strong>Block noise: Fable stayed on the ceiling as the dose tripled.</strong> At 3% it scored 40.3 against a ceiling of 40.0, having placed 99.7% of its edits on damaged entries. The best script reached 67.3. Larger blocks were also easier to find: Opus and Sonnet, which found half or none of the 1% blocks, located almost all of the 3% ones (43.4 and 48.1). Haiku again found nothing and returned the checkpoint unchanged (259.6).</li>
+    <li><strong>Scattered noise: the scripts fail at every dose, and the models only partly succeed.</strong> Even at 0.1% no script produced a working model, though the ceiling is 32.6. Fable reached 53.6 at 0.1%, 86.7 at 1% and 1,426 at 3%; the ceiling over the same range moves only from 32.6 to 39.6. The other three models were far behind at every dose.</li>
+    <li><strong>So the hypothesis holds in a specific region.</strong> A frontier model adds something scripts did not where the damage is unmarked. It matches perfect detection when the damage has structure to find (a block), and falls short, increasingly with dose, when the damage is scattered and overlaps the natural spread of the weights.</li>
+  </ul>
+  <ul class="ko">
+    <li><strong>소거에는 처음부터 모델이 필요 없었습니다.</strong> 0이 손상 위치를 알려 주므로 모든 용량에서 블라인드 스크립트가 상한과 같습니다. 나빠지는 것은 상한 자체입니다. 3%에서 약 39–41, 10%에서 180–280, 30%에서는 쓸 수 없는 수준입니다.</li>
+    <li><strong>블록 노이즈: 용량이 3배가 되어도 Fable은 상한에 머물렀습니다.</strong> 3%에서 상한 40.0 대비 40.3이었고, 수정의 99.7%가 손상 항목에 적중했습니다. 최선의 스크립트는 67.3이었습니다. 블록이 커지자 찾기도 쉬워졌습니다. 1% 블록을 절반만 찾거나 못 찾았던 Opus와 Sonnet이 3% 블록은 거의 다 찾았습니다(43.4, 48.1). Haiku는 이번에도 아무것도 찾지 못하고 체크포인트를 그대로 제출했습니다(259.6).</li>
+    <li><strong>산발 노이즈: 스크립트는 모든 용량에서 실패했고, 모델은 부분적으로만 성공했습니다.</strong> 상한이 32.6인 0.1%에서도 작동하는 모델을 만든 스크립트는 없었습니다. Fable은 0.1%에서 53.6, 1%에서 86.7, 3%에서 1,426이었고, 같은 구간에서 상한은 32.6에서 39.6으로만 움직입니다. 나머지 세 모델은 모든 용량에서 한참 뒤처졌습니다.</li>
+    <li><strong>따라서 가설은 특정 영역에서 성립합니다.</strong> 손상에 표시가 없는 곳에서 프런티어 모델은 스크립트가 하지 못한 일을 합니다. 손상에 찾아낼 구조(블록)가 있으면 완벽한 탐지와 같은 수준에 이르고, 손상이 흩어져 가중치의 자연스러운 분포와 겹치면 용량이 커질수록 더 못 미칩니다.</li>
+  </ul>
+  <p class="en">Why scattered noise stays hard: the scripts' outlier models did flag between a quarter and three quarters of the noisy entries, but the model stays collapsed unless nearly every wrong entry in a few high-gain token-embedding columns is caught. Fable's reports show it identified those columns, explained why single wrong entries there let one token win every prediction, and handled them and GPT-2's genuinely huge weights separately. That step came from running the damaged model and reasoning about its output, which is the part the scripts do not have.</p>
+  <p class="ko">산발 노이즈가 계속 어려운 이유: 스크립트의 이상치 모형도 노이즈 항목의 4분의 1에서 4분의 3은 표시했습니다. 하지만 이득이 큰 몇 개의 토큰 임베딩 열에서 잘못된 항목을 거의 전부 잡아내지 못하면 모델은 붕괴 상태로 남습니다. Fable의 보고서를 보면, 그 열들을 찾아내고 거기서 항목 하나만 틀려도 한 토큰이 모든 예측을 차지하게 되는 이유를 설명한 뒤, 그 열들과 GPT-2의 실제로 큰 가중치를 따로 처리했습니다. 이 단계는 손상된 모델을 실행하고 그 출력을 해석하는 데서 나왔고, 스크립트에는 없는 부분입니다.</p>
+  </div>
+</section>
+
 <section class="col">
   <h2><span class="en">Function came back; the weights did not</span><span class="ko">기능은 돌아왔지만 가중치는 돌아오지 않았다</span></h2>
   <p class="en">The table below compares each best repair with the hidden original, entry by entry. A residual of 1.00 means the damaged entries are as far from the truth as before; 0 means perfectly restored. Condition B reads differently: its noise is ten times larger than the weights, so simply deleting a noisy entry removes most of the error without recovering the value underneath.</p>
@@ -200,20 +251,24 @@ footer{border-top:1px solid var(--rule);padding-top:1.25rem;color:var(--ink-3);f
 <section class="col">
   <h2><span class="en">Limits of this study</span><span class="ko">이 연구의 한계</span></h2>
   <ul class="en">
-    <li><strong>One run per cell.</strong> Sixteen runs, one seed, no repeats. The ordering on the hard conditions (B and D) is large; differences of a few percent elsewhere are not established.</li>
+    <li><strong>One run per cell.</strong> Twenty-eight runs (sixteen at 1%, twelve in the follow-up), one seed, no repeats. The ordering on the hard conditions (B and D) is large; differences of a few percent elsewhere are not established.</li>
     <li><strong>GPT-2, not Qwen or Gemma.</strong> The run environment could not reach the hosts those models are published on. GPT-2's tied embedding with near-constant columns makes it unusually fragile, which shapes these results.</li>
     <li><strong>Isolation was by instruction and audit, not by sandbox.</strong> The answer key was encrypted during the runs and the agents' saved scripts contain no network calls or gradient code, but the agents shared one machine with network access.</li>
     <li><strong>Development text was used for selection.</strong> Models could compare a handful of candidate repairs on dev perplexity. Scores reported here are on separate test data.</li>
     <li><strong>Small benchmarks.</strong> The capitals test has 80 items (standard error about 0.055), and perplexity uses 40,000 tokens.</li>
     <li><strong>Budgets were soft.</strong> Models were asked to stay near 40 minutes; one run took 78.</li>
+    <li><strong>"Scripts fail" means these scripts.</strong> The stronger baselines were written in an afternoon, after the first-round reports had been read, by the same model family that ran the experiment. A script that hard-codes Fable's handling of the high-gain embedding columns would probably do much better on scattered noise. The claim is that the models worked this out unaided, not that no script could.</li>
+    <li><strong>The follow-up is not a full grid for the models.</strong> Models ran only in the noise conditions at 0.1%, 1% and 3%. They were told the damaged share; the scripts estimated it. The dose curve uses a reduced suite of 8,192 test tokens and 670 BLiMP pairs.</li>
   </ul>
   <ul class="ko">
-    <li><strong>셀당 실행 1회.</strong> 16개 실행, 시드 하나, 반복 없음. 어려운 조건(B, D)의 순위 차이는 크지만, 그 밖의 몇 퍼센트 차이는 확립된 것이 아닙니다.</li>
+    <li><strong>셀당 실행 1회.</strong> 28개 실행(1%에서 16개, 후속 실험에서 12개), 시드 하나, 반복 없음. 어려운 조건(B, D)의 순위 차이는 크지만, 그 밖의 몇 퍼센트 차이는 확립된 것이 아닙니다.</li>
     <li><strong>Qwen·Gemma가 아니라 GPT-2.</strong> 실행 환경에서 해당 모델이 공개된 호스트에 접근할 수 없었습니다. GPT-2는 거의 상수인 열을 가진 임베딩을 출력층과 공유해 유난히 취약하며, 이 점이 결과에 영향을 줍니다.</li>
     <li><strong>격리는 샌드박스가 아니라 지시와 감사로 했습니다.</strong> 실행 중 정답 키는 암호화돼 있었고 에이전트가 남긴 스크립트에 네트워크 호출이나 그래디언트 코드는 없지만, 에이전트들은 네트워크가 열린 한 대의 머신을 공유했습니다.</li>
     <li><strong>개발용 텍스트가 선택에 쓰였습니다.</strong> 모델은 소수의 후보 복구를 dev perplexity로 비교할 수 있었습니다. 여기 보고한 점수는 별도의 테스트 데이터 기준입니다.</li>
     <li><strong>벤치마크가 작습니다.</strong> 수도 테스트는 80문항(표준오차 약 0.055)이고 perplexity는 40,000 토큰 기준입니다.</li>
     <li><strong>예산은 권고였습니다.</strong> 40분 안팎을 요청했지만 한 실행은 78분이 걸렸습니다.</li>
+    <li><strong>"스크립트가 실패했다"는 이 스크립트들에 대한 말입니다.</strong> 강한 기준선은 첫 실험의 보고서를 읽은 뒤, 실험을 진행한 것과 같은 계열의 모델이 반나절 동안 작성했습니다. 이득이 큰 임베딩 열을 Fable처럼 처리하도록 직접 짜 넣은 스크립트라면 산발 노이즈에서 훨씬 나을 것입니다. 주장하는 바는 모델이 이를 도움 없이 알아냈다는 것이지, 어떤 스크립트로도 불가능하다는 것이 아닙니다.</li>
+    <li><strong>후속 실험에서 모델은 전체 격자를 돌지 않았습니다.</strong> 모델은 노이즈 조건의 0.1%, 1%, 3%에서만 실행했습니다. 모델에게는 손상 비율을 알려 주었고 스크립트는 스스로 추정했습니다. 용량 곡선은 테스트 8,192 토큰과 BLiMP 670쌍의 축소 벤치마크를 씁니다.</li>
   </ul>
 </section>
 
@@ -224,7 +279,11 @@ cd llm-weight-repair &amp;&amp; pip install -r requirements.txt
 bash scripts/fetch_assets.sh                      # GPT-2, WikiText-2, BLiMP
 python src/prepare.py assets secret               # clean + 4 damaged checkpoints
 # run a repair agent per TASK.md in agent_kit/, then:
-python src/evaluate_runs.py assets secret runs stage results/results.json</code></pre>
+python src/evaluate_runs.py assets secret runs stage results/results.json
+# follow-up: scripted dose grid, extra damaged cells, reduced-suite scores
+python src/dose_response.py assets secret/clean.safetensors results/dose_response.json
+python src/make_cells.py secret/clean.safetensors stage secret
+python src/score_llm_lite.py assets secret runs results/llm_lite.json</code></pre>
   <p class="en">Every agent's scripts and its own report are in <code>runs/</code>. Scores are in <code>results/results.json</code>.</p>
   <p class="ko">각 에이전트의 스크립트와 자체 보고서는 <code>runs/</code>에, 점수는 <code>results/results.json</code>에 있습니다.</p>
   <footer>
@@ -355,7 +414,47 @@ function renderBaseline(){
 <p style="margin-top:1rem">참조 행은 어떤 항목이 손상됐는지 스크립트에 정확히 알려 준 상태에서 같은 열 평균 채우기를 한 결과입니다(${CASES.map(c=>c+' '+g(c,'oracle_colmean')).join(', ')}). 블라인드 방법이 아니며, 완벽한 탐지에 거친 채우기를 더하면 어느 정도인지를 보여 줍니다. 여기서 세 가지를 알 수 있습니다. 최고 모델들의 정교한 값 추정은 열 평균 대비 perplexity 1 정도의 이득이었습니다. Fable의 D 블라인드 복구는 이 참조와 같은 수준이므로 그 탐지는 거의 완벽했습니다. 그리고 B에서 81과 30.7 사이의 격차는 전부 탐지하지 못했거나 잘못 지운 항목에서 옵니다.</p>`;
   document.getElementById('baselineNote').innerHTML=`<div class="en">${en}</div><div class="ko">${ko}</div>`;
 }
-function renderAll(){renderCond();renderPanels();renderMain();renderResid();renderBaseline();}
+
+const DCOND=[['scatter_zero',['Scattered erasure','산발 소거']],['block_zero',['Block erasure','블록 소거']],['block_noise',['Block noise','블록 노이즈']],['scatter_noise',['Scattered noise','산발 노이즈']]];
+const FR=[0.001,0.01,0.03,0.1,0.3], MODELS4=[['fable','Fable'],['opus','Opus'],['sonnet','Sonnet'],['haiku','Haiku']];
+const fmtN=n=>fmtPpl({wikitext2_nll:n});
+function liteAt(cond,fr){const o={};for(const k in DATA.lite){const v=DATA.lite[k];if(v.condition===cond&&v.frac===fr&&v.nll!=null)o[k.split('/')[1]]=v;}return o;}
+function renderDose(){
+  const host=document.getElementById('dosePanels');host.innerHTML='';
+  const W=460,H=250,L=44,R=14,top=14,bot=34,lo=Math.log10(30),hi=5;
+  const X=i=>L+18+i*(W-L-R-36)/(FR.length-1);
+  const Y=n=>{const v=Math.min(Math.max(n/Math.LN10,lo),hi);return H-bot-(v-lo)/(hi-lo)*(H-top-bot)};
+  const cellOf=(c,f)=>DATA.dose.cells[c+'@'+f]||DATA.dose.cells[c+'@'+f.toFixed(1)];
+  for(const [cond,nm] of DCOND){
+    let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${T(...nm)}">`;
+    for(const t of [100,1000,10000,100000]){const y=Y(Math.log(t));g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--rule)" stroke-width="1"/><text x="${L-6}" y="${y+3.5}" text-anchor="end" font-size="10.5" fill="var(--ink-3)" font-family="var(--mono)">${t===100000?'≥10⁵':'10'+sup(Math.log10(t))}</text>`;}
+    const yc=Y(DATA.dose.clean.nll);g+=`<line x1="${L}" x2="${W-R}" y1="${yc}" y2="${yc}" stroke="var(--clean)" stroke-width="1" stroke-dasharray="1 3"/><text x="${L-6}" y="${yc+3.5}" text-anchor="end" font-size="10.5" fill="var(--ink-2)" font-family="var(--mono)">32</text>`;
+    FR.forEach((f,i)=>{g+=`<text x="${X(i)}" y="${H-12}" text-anchor="middle" font-size="10.5" fill="var(--ink-3)" font-family="var(--mono)">${f*100}%</text>`;});
+    const path=(m)=>FR.map((f,i)=>{const c=cellOf(cond,f);return c?[X(i),Y(c.methods[m].nll),c.methods[m].nll]:null}).filter(Boolean);
+    const ora=path('oracle_ridge'),aut=path('auto');
+    g+=`<polyline fill="none" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="4 3" points="${ora.map(p=>p[0]+','+p[1]).join(' ')}"/>`;
+    g+=`<polyline fill="none" stroke="var(--scripted)" stroke-width="2" points="${aut.map(p=>p[0]+','+p[1]).join(' ')}"/>`;
+    aut.forEach((p,i)=>{g+=`<rect x="${p[0]-4.5}" y="${p[1]-4.5}" width="9" height="9" fill="var(--scripted)" stroke="var(--surface)" stroke-width="1.5"><title>${T('Best blind script','최선의 블라인드 스크립트')}: ${fmtN(p[2])} · ${T('ceiling','상한')}: ${fmtN(ora[i][2])}</title></rect>`;});
+    FR.forEach((f,i)=>{const l=liteAt(cond,f);MODELS4.forEach(([k,n],j)=>{if(!l[k])return;const x=X(i)-16.5+j*11,y=Y(l[k].nll);
+      g+=`<circle cx="${x}" cy="${y}" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.5"><title>${n} · ${f*100}%: ${fmtN(l[k].nll)}</title></circle><text x="${x}" y="${y+(y<top+14?16:-8)}" text-anchor="middle" font-size="9.5" font-weight="600" fill="var(--accent-ink)" font-family="var(--mono)">${n[0]}</text>`;});});
+    g+='</svg>';
+    const d=document.createElement('div');d.className='panel';
+    d.innerHTML=`<h3>${T(...nm)}</h3><div class="sub">${T('perplexity (log) by share of weights damaged','손상 비율별 perplexity (로그)')}</div>`+g;host.appendChild(d);}
+  const cols=[['scatter_noise',0.001],['scatter_noise',0.01],['scatter_noise',0.03],['block_noise',0.01],['block_noise',0.03]];
+  const cn={scatter_noise:['Scattered noise','산발 노이즈'],block_noise:['Block noise','블록 노이즈']};
+  let s='<thead><tr><th>'+T('Repair by','복구 주체')+'</th>'+cols.map(c=>`<th>${T(...cn[c[0]])} ${c[1]*100}%</th>`).join('')+'</tr></thead><tbody>';
+  const grp=t=>`<tr class="grp"><td colspan="6">${t}</td></tr>`;
+  s+=grp(T('Claude models','Claude 모델'));
+  const lites=cols.map(c=>liteAt(c[0],c[1]));
+  for(const [k,n] of MODELS4){s+=`<tr><td>${n}</td>`+lites.map(l=>{const b=Math.min(...MODELS4.map(m=>l[m[0]]?l[m[0]].nll:1e9));
+    return `<td class="num ${l[k]&&l[k].nll===b?'best':''}">${l[k]?fmtN(l[k].nll)+(l[k].n_changed===0?' *':''):'–'}</td>`}).join('')+'</tr>';}
+  const row=(lab,m,cls)=>`<tr class="${cls||''}"><td>${lab}</td>`+cols.map(c=>`<td class="num">${fmtN(cellOf(c[0],c[1]).methods[m].nll)}</td>`).join('')+'</tr>';
+  s+=grp(T('Scripts, no LLM','스크립트 (LLM 없음)'))+row(T('Best blind script','최선의 블라인드 스크립트'),'auto');
+  s+=grp(T('Reference that is told where the damage is','손상 위치를 알려 준 참조'))+row(T('Ceiling: known mask → ridge','상한: 마스크 공개 → 릿지'),'oracle_ridge','ref');
+  s+=grp(T('No repair','복구 없음'))+row(T('Damaged','손상 상태'),'damaged');
+  document.getElementById('doseTable').innerHTML=s+'</tbody>';
+}
+function renderAll(){renderCond();renderPanels();renderMain();renderResid();renderBaseline();renderDose();}
 setLang(lang);
 })();
 </script>

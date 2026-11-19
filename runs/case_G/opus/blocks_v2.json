@@ -1,0 +1,302 @@
+{
+ "h.0.attn.c_attn.weight": [
+  52,
+  185,
+  1588,
+  1987
+ ],
+ "h.0.attn.c_proj.weight": [
+  269,
+  402,
+  628,
+  761
+ ],
+ "h.0.mlp.c_fc.weight": [
+  204,
+  337,
+  416,
+  948
+ ],
+ "h.0.mlp.c_proj.weight": [
+  667,
+  1199,
+  196,
+  329
+ ],
+ "h.1.attn.c_attn.weight": [
+  525,
+  658,
+  305,
+  704
+ ],
+ "h.1.attn.c_proj.weight": [
+  123,
+  256,
+  332,
+  465
+ ],
+ "h.1.mlp.c_fc.weight": [
+  617,
+  750,
+  1255,
+  1787
+ ],
+ "h.1.mlp.c_proj.weight": [
+  1889,
+  2421,
+  632,
+  765
+ ],
+ "h.10.attn.c_attn.weight": [
+  350,
+  483,
+  1040,
+  1439
+ ],
+ "h.10.attn.c_proj.weight": [
+  603,
+  736,
+  461,
+  594
+ ],
+ "h.10.mlp.c_fc.weight": [
+  245,
+  378,
+  1738,
+  2270
+ ],
+ "h.10.mlp.c_proj.weight": [
+  435,
+  967,
+  167,
+  300
+ ],
+ "h.11.attn.c_attn.weight": [
+  362,
+  495,
+  983,
+  1382
+ ],
+ "h.11.attn.c_proj.weight": [
+  462,
+  595,
+  139,
+  272
+ ],
+ "h.11.mlp.c_fc.weight": [
+  14,
+  147,
+  1577,
+  2109
+ ],
+ "h.11.mlp.c_proj.weight": [
+  275,
+  807,
+  307,
+  440
+ ],
+ "h.2.attn.c_attn.weight": [
+  202,
+  335,
+  1509,
+  1908
+ ],
+ "h.2.attn.c_proj.weight": [
+  448,
+  581,
+  46,
+  179
+ ],
+ "h.2.mlp.c_fc.weight": [
+  104,
+  237,
+  818,
+  1350
+ ],
+ "h.2.mlp.c_proj.weight": [
+  504,
+  1036,
+  419,
+  552
+ ],
+ "h.3.attn.c_attn.weight": [
+  482,
+  615,
+  1905,
+  2304
+ ],
+ "h.3.attn.c_proj.weight": [
+  384,
+  517,
+  211,
+  344
+ ],
+ "h.3.mlp.c_fc.weight": [
+  478,
+  611,
+  1751,
+  2283
+ ],
+ "h.3.mlp.c_proj.weight": [
+  1083,
+  1615,
+  135,
+  268
+ ],
+ "h.4.attn.c_attn.weight": [
+  150,
+  283,
+  1536,
+  1935
+ ],
+ "h.4.attn.c_proj.weight": [
+  0,
+  133,
+  231,
+  364
+ ],
+ "h.4.mlp.c_fc.weight": [
+  264,
+  397,
+  1922,
+  2454
+ ],
+ "h.4.mlp.c_proj.weight": [
+  710,
+  1242,
+  348,
+  481
+ ],
+ "h.5.attn.c_attn.weight": [
+  68,
+  201,
+  1565,
+  1964
+ ],
+ "h.5.attn.c_proj.weight": [
+  197,
+  330,
+  461,
+  594
+ ],
+ "h.5.mlp.c_fc.weight": [
+  197,
+  330,
+  1743,
+  2275
+ ],
+ "h.5.mlp.c_proj.weight": [
+  1169,
+  1701,
+  618,
+  751
+ ],
+ "h.6.attn.c_attn.weight": [
+  350,
+  483,
+  909,
+  1308
+ ],
+ "h.6.attn.c_proj.weight": [
+  507,
+  640,
+  539,
+  672
+ ],
+ "h.6.mlp.c_fc.weight": [
+  613,
+  746,
+  1751,
+  2283
+ ],
+ "h.6.mlp.c_proj.weight": [
+  2186,
+  2718,
+  85,
+  218
+ ],
+ "h.7.attn.c_attn.weight": [
+  373,
+  506,
+  961,
+  1360
+ ],
+ "h.7.attn.c_proj.weight": [
+  504,
+  637,
+  204,
+  337
+ ],
+ "h.7.mlp.c_fc.weight": [
+  608,
+  741,
+  1285,
+  1817
+ ],
+ "h.7.mlp.c_proj.weight": [
+  1241,
+  1773,
+  617,
+  750
+ ],
+ "h.8.attn.c_attn.weight": [
+  39,
+  172,
+  1079,
+  1478
+ ],
+ "h.8.attn.c_proj.weight": [
+  385,
+  518,
+  517,
+  650
+ ],
+ "h.8.mlp.c_fc.weight": [
+  0,
+  133,
+  1225,
+  1757
+ ],
+ "h.8.mlp.c_proj.weight": [
+  1104,
+  1636,
+  6,
+  139
+ ],
+ "h.9.attn.c_attn.weight": [
+  372,
+  505,
+  1088,
+  1487
+ ],
+ "h.9.attn.c_proj.weight": [
+  573,
+  706,
+  72,
+  205
+ ],
+ "h.9.mlp.c_fc.weight": [
+  305,
+  438,
+  1030,
+  1562
+ ],
+ "h.9.mlp.c_proj.weight": [
+  2013,
+  2545,
+  43,
+  176
+ ],
+ "wpe.weight": [
+  125,
+  302,
+  591,
+  724
+ ],
+ "wte.weight": [
+  34395,
+  43100,
+  620,
+  753
+ ]
+}
