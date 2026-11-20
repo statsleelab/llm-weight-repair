@@ -1,471 +1,627 @@
-<!doctype html>
-<html lang="en" data-lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Blind Weight Repair</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<style>
-/* Layout: one reading column (max 46rem) for prose; figures and tables break out to 64rem. */
-:root{
-  --bg:#f7f8fa; --surface:#ffffff; --ink:#14181f; --ink-2:#4a5361; --ink-3:#7a8494;
-  --rule:#dfe3ea; --accent:#2a78d6; --accent-ink:#1b5fb4; --scripted:#7a8494; --clean:#14181f;
-  --good:#0b7a3b; --bad:#b3261e; --chip:#eef2f8;
-  --display:"Space Grotesk","Noto Sans KR",system-ui,sans-serif;
-  --body:"IBM Plex Sans","Noto Sans KR",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
-}
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#12151a; --surface:#1a1e25; --ink:#eceff4; --ink-2:#b4bcc9; --ink-3:#8791a1;
-  --rule:#2c323c; --accent:#3987e5; --accent-ink:#7db2f2; --scripted:#8791a1; --clean:#eceff4;
-  --good:#4cc38a; --bad:#f2857c; --chip:#232934; color-scheme:dark } }
-:root[data-theme="dark"]{
-  --bg:#12151a; --surface:#1a1e25; --ink:#eceff4; --ink-2:#b4bcc9; --ink-3:#8791a1;
-  --rule:#2c323c; --accent:#3987e5; --accent-ink:#7db2f2; --scripted:#8791a1; --clean:#eceff4;
-  --good:#4cc38a; --bad:#f2857c; --chip:#232934; color-scheme:dark }
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:400 1rem/1.65 var(--body);margin:0}
-.wrap{max-width:64rem;margin:0 auto;padding-block:2.5rem 4rem;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:3rem}
-.col{max-width:46rem}
-section{display:flex;flex-direction:column;gap:1rem;min-width:0}
-h1{font:600 clamp(1.7rem,4.2vw,2.6rem)/1.15 var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
-h2{font:600 1.35rem/1.25 var(--display);margin:0;text-wrap:balance}
-h3{font:600 1rem/1.3 var(--display);margin:0}
-p{margin:0} a{color:var(--accent-ink)}
-code,.num{font-family:var(--mono);font-size:.9em}
-.num{font-variant-numeric:tabular-nums}
-.eyebrow{font:500 .75rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
-.byline{color:var(--ink-2);font-size:.95rem}
-.top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
-.lang{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden;background:var(--surface)}
-.lang button{font:500 .8rem/1 var(--body);padding:.5rem .8rem;border:0;background:transparent;color:var(--ink-2);cursor:pointer}
-.lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
-.lang button:focus-visible,.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-html[data-lang="en"] .ko, html[data-lang="ko"] .en{display:none !important}
-.lede{font-size:1.12rem;color:var(--ink-2)}
-.verdict{border-left:3px solid var(--accent);padding:.25rem 0 .25rem 1rem;display:flex;flex-direction:column;gap:.6rem}
-.verdict p:first-child{font:500 1.15rem/1.45 var(--body);color:var(--ink)}
-ul{margin:0;padding-left:1.2rem;display:flex;flex-direction:column;gap:.4rem}
-.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:8px;overflow:hidden}
-.steps>div{background:var(--surface);padding:1rem;display:flex;flex-direction:column;gap:.4rem;min-width:0}
-.steps .k{font:500 .72rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink)}
-.steps p{font-size:.92rem;color:var(--ink-2);line-height:1.5}
-@media (max-width:720px){.steps{grid-template-columns:1fr}}
-.tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
-table{border-collapse:collapse;width:100%;font-size:.88rem}
-th,td{padding:.5rem .7rem;text-align:right;white-space:nowrap;border-bottom:1px solid var(--rule)}
-th:first-child,td:first-child{text-align:left}
-thead th{font:500 .72rem/1.2 var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);background:var(--chip)}
-tbody tr:last-child td{border-bottom:0}
-td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
-tr.grp td{background:var(--chip);font:600 .82rem/1.2 var(--display);text-align:left}
-tr.ref td{color:var(--ink-3)}
-.best{font-weight:600;color:var(--accent-ink)}
-.figure{display:flex;flex-direction:column;gap:.75rem}
-.panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
-@media (max-width:820px){.panels{grid-template-columns:1fr}}
-.panel{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:.9rem .9rem .5rem;min-width:0;position:relative}
-.panel h3{margin-bottom:.1rem}.panel .sub{font-size:.8rem;color:var(--ink-3);margin-bottom:.4rem}
-.panel svg{display:block;width:100%;height:auto}
-.legend{display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;font-size:.82rem;color:var(--ink-2)}
-.legend span{display:inline-flex;align-items:center;gap:.4rem}
-.cap{font-size:.84rem;color:var(--ink-3);max-width:46rem}
-.seg{display:inline-flex;flex-wrap:wrap;gap:.35rem}
-.seg button{font:500 .8rem/1 var(--body);padding:.45rem .7rem;border:1px solid var(--rule);border-radius:6px;background:var(--surface);color:var(--ink-2);cursor:pointer}
-.seg button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent-ink);background:var(--chip)}
-#tip{position:fixed;z-index:20;pointer-events:none;background:var(--ink);color:var(--bg);font:400 .78rem/1.45 var(--mono);padding:.5rem .65rem;border-radius:6px;max-width:17rem;white-space:pre-line}
-.cases{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5rem 2rem}
-@media (max-width:820px){.cases{grid-template-columns:1fr}}
-.case{display:flex;flex-direction:column;gap:.5rem;min-width:0}
-.case p{font-size:.94rem;color:var(--ink-2)}
-pre{margin:0;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:.9rem;overflow-x:auto;font:400 .82rem/1.55 var(--mono)}
-footer{border-top:1px solid var(--rule);padding-top:1.25rem;color:var(--ink-3);font-size:.85rem}
-@media (prefers-reduced-motion:no-preference){.seg button,.lang button{transition:background .15s,color .15s}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blind Weight Repair — Can a Frontier LLM Fix a Damaged Language Model?</title>
+  <meta name="description" content="We damaged the weights of GPT-2 and asked four Claude models to repair it by editing the weights directly, without the original. Results, dose-response curve and scripted baselines (English & Korean)." />
+  <link rel="stylesheet" href="style.css?v=1" />
 </head>
-<body>
+<body data-lang="en">
 
+  <!-- HERO -->
+  <header class="hero">
+    <div class="container">
+      <div class="top-bar">
+        <div class="badges">
+          <span class="badge green">28 Blind Repair Runs</span>
+          <span class="badge">GPT-2 (124M) · 4 Claude Models</span>
+          <span class="badge purple">Weight-Space Programming · Part III</span>
+        </div>
+        <div class="lang-switch" aria-label="Language Switcher">
+          <button class="lang-btn active" data-set-lang="en">English</button>
+          <button class="lang-btn" data-set-lang="ko">한국어</button>
+        </div>
+      </div>
 
-<div class="wrap">
-<header class="col" style="display:flex;flex-direction:column;gap:1rem">
-  <div class="top">
-    <span class="eyebrow"><span class="en">Direct weight editing · Study report</span><span class="ko">직접 가중치 편집 · 연구 보고서</span></span>
-    <div class="lang" role="group" aria-label="Language">
-      <button id="btn-en" type="button" aria-pressed="true">English</button>
-      <button id="btn-ko" type="button" aria-pressed="false">한국어</button>
+      <div class="lang-en">
+        <h1>Blind Weight Repair:<br/>Can a Frontier LLM Fix a Damaged Language Model by Editing Its Weights?</h1>
+        <p class="byline"><strong>Donghyung Lee</strong> · Miami University · November 2026</p>
+        <p class="subtitle">
+          <strong>Abstract —</strong> We took a small language model (GPT-2), deliberately broke some of its weights, and handed the broken file to four Claude models (Fable, Opus, Sonnet, Haiku).
+          Each had to work out what was wrong and <strong>write better numbers into the file by hand</strong>: no copy of the original, no downloads, no retraining.
+          The best model brought the broken model back to near-normal in <strong>three of four kinds of damage</strong>. What it contributed was <strong>finding the damage</strong>. Guessing the lost values turned out to matter much less.
+        </p>
+      </div>
+      <div class="lang-ko">
+        <h1>블라인드 가중치 복구:<br/>프런티어 LLM은 가중치를 직접 고쳐서 손상된 언어 모델을 살릴 수 있는가?</h1>
+        <p class="byline"><strong>Donghyung Lee</strong> · Miami University · 2026년 11월</p>
+        <p class="subtitle">
+          <strong>요약 —</strong> 작은 언어 모델(GPT-2)의 가중치 일부를 일부러 망가뜨린 뒤, 그 망가진 파일을 네 개의 Claude 모델(Fable, Opus, Sonnet, Haiku)에게 주었습니다.
+          각 모델은 무엇이 잘못됐는지 스스로 알아내고 <strong>파일에 더 나은 숫자를 직접 써 넣어야</strong> 했습니다. 원본도, 다운로드도, 재학습도 없습니다.
+          가장 좋은 모델은 <strong>네 가지 손상 중 세 가지</strong>에서 모델을 거의 정상으로 되돌렸습니다. 모델이 기여한 것은 <strong>손상을 찾아내는 일</strong>이었고, 잃어버린 값을 맞히는 일은 훨씬 덜 중요했습니다.
+        </p>
+      </div>
+
+      <div class="hero-links">
+        <a class="btn" href="https://github.com/statsleelab/llm-weight-repair" target="_blank" rel="noopener">
+          <span class="lang-en">GitHub Code &amp; Data Repository →</span><span class="lang-ko">GitHub 코드·데이터 저장소 →</span>
+        </a>
+        <a class="btn secondary" href="https://statsleelab.github.io/weight_space_programming/" target="_blank" rel="noopener">
+          <span class="lang-en">Part I: Weight-Space Programming Reproduction</span><span class="lang-ko">1부: Weight-Space Programming 재현</span>
+        </a>
+        <a class="btn secondary" href="https://statsleelab.github.io/connectome-weight-edit/" target="_blank" rel="noopener">
+          <span class="lang-en">Part II: Connectome Weight Surgery</span><span class="lang-ko">2부: 커넥톰 가중치 수술</span>
+        </a>
+      </div>
+
+      <div class="kpi-grid lang-en">
+        <div class="kpi-card">
+          <div class="kpi-val">3 of 4</div>
+          <div class="kpi-label">Damage Types Repaired</div>
+          <div class="kpi-desc">With 1% of weights damaged, the best model got within about 6% of the healthy model's score</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">30.5 vs 30.9</div>
+          <div class="kpi-label">Blind Model vs Answer-Aided Script</div>
+          <div class="kpi-desc">On hidden noise blocks, Fable's blind repair matched a script that was told where the damage was</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">0 of 5</div>
+          <div class="kpi-label">Doses Where Scripts Fixed Scattered Noise</div>
+          <div class="kpi-desc">Every automatic script failed from 0.1% to 30%. Fable recovered part of the way</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">65–97%</div>
+          <div class="kpi-label">Weight Error Still There</div>
+          <div class="kpi-desc">The model works again, but most lost values were not recovered. Repair is not restoration</div>
+        </div>
+      </div>
+      <div class="kpi-grid lang-ko">
+        <div class="kpi-card">
+          <div class="kpi-val">4개 중 3개</div>
+          <div class="kpi-label">복구된 손상 유형</div>
+          <div class="kpi-desc">가중치 1% 손상에서 최고 모델은 정상 모델 점수의 약 6% 이내까지 되돌렸습니다</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">30.5 vs 30.9</div>
+          <div class="kpi-label">블라인드 모델 vs 정답을 받은 스크립트</div>
+          <div class="kpi-desc">숨겨진 노이즈 블록에서 Fable의 블라인드 복구는 손상 위치를 받은 스크립트와 같은 수준이었습니다</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">5개 중 0개</div>
+          <div class="kpi-label">스크립트가 산발 노이즈를 고친 용량</div>
+          <div class="kpi-desc">0.1%부터 30%까지 모든 자동 스크립트가 실패했고, Fable은 일부를 회복했습니다</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">65–97%</div>
+          <div class="kpi-label">남아 있는 가중치 오차</div>
+          <div class="kpi-desc">모델은 다시 작동하지만 잃어버린 값은 대부분 되찾지 못했습니다. 복구는 복원이 아닙니다</div>
+        </div>
+      </div>
     </div>
-  </div>
-  <h1><span class="en">Can a frontier LLM repair a damaged language model by editing its weights, without seeing the original?</span><span class="ko">프런티어 LLM은 원본을 보지 않고, 가중치를 직접 고쳐서 손상된 언어 모델을 복구할 수 있는가?</span></h1>
-  <p class="byline">Donghyung Lee · Miami University · <span class="num">2026-11-19</span> ·
-    <a href="https://github.com/statsleelab/llm-weight-repair">statsleelab/llm-weight-repair</a></p>
-  <p class="lede en">We corrupted 1% of the weights of GPT-2 (124M) in four different ways, then gave only the corrupted checkpoint to four Claude models. Each had to diagnose the damage and write better weight values by hand: no original weights, no downloads, no gradient training. We then scored the repaired checkpoints on benchmarks the models never saw.</p>
-  <p class="lede ko">GPT-2(124M) 가중치의 1%를 네 가지 방식으로 손상시킨 뒤, 손상된 체크포인트만 네 개의 Claude 모델에게 주었습니다. 각 모델은 손상을 스스로 진단하고 더 나은 가중치 값을 직접 써 넣어야 했습니다. 원본 가중치, 다운로드, 그래디언트 학습은 모두 금지했습니다. 복구된 체크포인트는 모델이 보지 못한 벤치마크로 채점했습니다.</p>
-</header>
+  </header>
 
-<section class="col">
-  <h2><span class="en">Answer</span><span class="ko">결론</span></h2>
-  <div class="verdict en">
-    <p>Partly yes. In three of the four damage conditions the best model brought held-out perplexity back to within about 6% of the undamaged model (30.2–30.8 against 28.9). In the fourth, the best repair still left perplexity 2.8 times too high.</p>
-    <p>The models' real contribution was diagnosis. Once the damaged entries are known, a five-line script that fills them with the column mean gets to 30.7–31.7 in every condition. The best models beat that by about one point. What separated them was whether they could work out, unaided, what was wrong and where.</p>
-    <p>The repairs work by finding the damage and neutralising it. They mostly do not recover the lost values: in those three conditions, outside the two embedding tables, 65–97% of the weight error remained after the best repair.</p>
-  </div>
-  <div class="verdict ko">
-    <p>부분적으로 그렇습니다. 네 가지 손상 조건 중 세 가지에서 가장 좋은 모델은 held-out perplexity를 손상 전 모델의 약 6% 이내(28.9 대비 30.2–30.8)로 되돌렸습니다. 나머지 한 조건에서는 최선의 복구도 perplexity가 2.8배 높게 남았습니다.</p>
-    <p>모델의 실질적 기여는 진단이었습니다. 손상된 항목이 어디인지만 알면, 그 항목을 열 평균으로 채우는 5줄짜리 스크립트가 모든 조건에서 30.7–31.7에 도달합니다. 가장 좋은 모델들은 그보다 1 정도 나았습니다. 모델 간 차이를 만든 것은 무엇이 어디서 잘못됐는지를 도움 없이 알아낼 수 있느냐였습니다.</p>
-    <p>복구는 손상을 찾아내 무력화하는 방식으로 작동합니다. 잃어버린 값 자체는 대부분 되찾지 못했습니다. 그 세 조건에서 두 임베딩 테이블을 제외하면, 가장 좋은 복구 후에도 가중치 오차의 65–97%가 남았습니다.</p>
-  </div>
-  <ul class="en">
-    <li><strong>Capability mattered where the damage had to be found.</strong> When entries were erased to zero in blocks, all four models repaired equally well. With noise blocks, which nothing marks, only Fable found all of them, and its blind repair (30.5) matched a script that was handed the exact damage mask (30.9). With scattered noise no model came close to that reference (81 against 30.7).</li>
-    <li><strong>Erasure does not need a frontier model.</strong> Zeros give the damage away. Filling them with the column mean scores 31.4 and 31.7 in the two erasure conditions, better than Sonnet and Haiku managed on scattered erasure.</li>
-    <li><strong>The dominant failure point is the token embedding.</strong> GPT-2's output layer reuses it, and a few of its columns are near-constant offsets with a large gain. One wrong entry there shifts a token's score by tens of nats. Every successful repair fixed this first.</li>
-    <li><strong>A follow-up across doses sharpened this.</strong> Against stronger scripts and from 0.1% to 3% damage, the pattern held: scripts match the best possible repair for erasure, Fable alone matches it for noise blocks, and scattered noise defeats every script while Fable gets part of the way (53.6 at 0.1%, 1,426 at 3%; reduced suite, undamaged 32.2).</li>
-    <li><strong>This is one run per model and condition</strong>, on one seed and one small model. Read differences of a few percent as noise.</li>
-  </ul>
-  <ul class="ko">
-    <li><strong>손상을 찾아내야 하는 조건에서 모델 능력 차이가 드러났습니다.</strong> 항목이 블록 단위로 0이 된 경우에는 네 모델이 똑같이 잘 복구했습니다. 아무 표시가 없는 노이즈 블록은 Fable만 전부 찾아냈고, 그 블라인드 복구(30.5)는 정확한 손상 마스크를 받은 스크립트(30.9)와 같은 수준이었습니다. 산발 노이즈에서는 어떤 모델도 그 참조에 가까이 가지 못했습니다(30.7 대비 81).</li>
-    <li><strong>소거 손상에는 프런티어 모델이 필요하지 않습니다.</strong> 0이 손상 위치를 드러내기 때문입니다. 0을 열 평균으로 채우기만 해도 두 소거 조건에서 31.4와 31.7이 나오며, 이는 산발 소거에서 Sonnet과 Haiku가 낸 결과보다 좋습니다.</li>
-    <li><strong>가장 치명적인 지점은 토큰 임베딩입니다.</strong> GPT-2의 출력층은 토큰 임베딩을 재사용하는데, 그중 몇 개 열은 거의 상수인 오프셋이고 큰 이득이 곱해집니다. 그 열의 항목 하나가 틀리면 해당 토큰의 점수가 수십 nat씩 이동합니다. 성공한 복구는 모두 이것부터 고쳤습니다.</li>
-    <li><strong>용량을 바꾼 후속 실험에서 이 그림이 더 분명해졌습니다.</strong> 더 강한 스크립트와 비교하고 손상을 0.1%에서 3%까지 바꿔도 패턴은 같았습니다. 소거에서는 스크립트가 가능한 최선의 복구와 같고, 노이즈 블록에서는 Fable만 그 수준에 이르며, 산발 노이즈에서는 모든 스크립트가 실패하고 Fable이 일부만 회복합니다(0.1%에서 53.6, 3%에서 1,426. 축소 벤치마크 기준, 손상 전 32.2).</li>
-    <li><strong>모델·조건당 실행은 1회</strong>이고, 시드 하나와 작은 모델 하나에 대한 결과입니다. 몇 퍼센트 차이는 잡음으로 읽어야 합니다.</li>
-  </ul>
-</section>
-
-<section>
-  <h2 class="col"><span class="en">How the experiment ran</span><span class="ko">실험 절차</span></h2>
-  <div class="steps">
-    <div><span class="k"><span class="en">Damage</span><span class="ko">손상</span></span>
-      <p class="en">Take GPT-2 (124M). Corrupt 1.0% of the entries of every 2-D weight matrix, with a fixed seed. Record what the clean and the damaged model score. Encrypt the clean weights, the damage masks and all test data.</p>
-      <p class="ko">GPT-2(124M)의 모든 2차원 가중치 행렬에서 항목의 1.0%를 고정 시드로 손상시킵니다. 원본과 손상 모델의 점수를 기록한 뒤, 원본 가중치·손상 마스크·테스트 데이터를 모두 암호화합니다.</p></div>
-    <div><span class="k"><span class="en">Blind repair</span><span class="ko">블라인드 복구</span></span>
-      <p class="en">Each model works alone in a directory holding the damaged checkpoint, a small GPT-2 implementation, and 60 kB of development text. It is told only that about 1% of the matrix entries are wrong. It may read weights, run the damaged model, and use statistics and linear algebra. It may not train.</p>
-      <p class="ko">각 모델은 손상된 체크포인트, 작은 GPT-2 구현, 60 kB의 개발용 텍스트만 있는 디렉터리에서 혼자 작업합니다. "행렬 항목의 약 1%가 잘못됐다"는 것만 알려 줍니다. 가중치를 읽고, 손상 모델을 실행하고, 통계와 선형대수를 쓸 수 있습니다. 학습은 할 수 없습니다.</p></div>
-    <div><span class="k"><span class="en">Held-out scoring</span><span class="ko">Held-out 채점</span></span>
-      <p class="en">After all sixteen runs ended, the answer key was decrypted. Each repaired checkpoint was scored on WikiText-2 test perplexity, BLiMP grammar pairs and a capital-city recall test, and compared entry by entry with the clean weights.</p>
-      <p class="ko">16개 실행이 모두 끝난 뒤에 정답 키를 복호화했습니다. 복구된 체크포인트마다 WikiText-2 테스트 perplexity, BLiMP 문법 쌍, 수도 맞히기 테스트로 채점하고, 원본 가중치와 항목 단위로 비교했습니다.</p></div>
-  </div>
-  <div class="col" style="display:flex;flex-direction:column;gap:1rem">
-  <h3><span class="en">The four damage conditions</span><span class="ko">네 가지 손상 조건</span></h3>
-  <p class="en">Two patterns crossed with two kinds of value. Scattered damage hits independent random entries, like bit rot. Block damage hits one contiguous rectangle per matrix (10% of its rows by 10% of its columns), like a bad disk sector. Entries are either erased to exactly zero or hit with Gaussian noise.</p>
-  <p class="ko">두 가지 패턴과 두 가지 값의 조합입니다. 산발 손상은 비트 부식처럼 서로 독립인 무작위 항목에 생깁니다. 블록 손상은 디스크 불량 섹터처럼 행렬마다 연속된 직사각형 하나(행의 10% × 열의 10%)에 생깁니다. 손상된 항목은 정확히 0으로 지워지거나 가우시안 노이즈를 받습니다.</p>
-  </div>
-  <div class="tablewrap col"><table id="cond"></table></div>
-  <p class="cap en">Clean GPT-2 scores perplexity <span class="num">28.93</span>, BLiMP <span class="num">0.830</span>, capitals <span class="num">0.563</span> on the same held-out sets. Noise scale: scattered noise adds N(0, (10σ)²) to each hit entry; block noise overwrites the block with N(0, σ²), where σ is that matrix's standard deviation.</p>
-  <p class="cap ko">같은 held-out 세트에서 원본 GPT-2는 perplexity <span class="num">28.93</span>, BLiMP <span class="num">0.830</span>, 수도 <span class="num">0.563</span>입니다. 노이즈 크기: 산발 노이즈는 해당 항목에 N(0, (10σ)²)를 더하고, 블록 노이즈는 블록을 N(0, σ²)로 덮어씁니다(σ는 그 행렬의 표준편차).</p>
-</section>
-
-<section>
-  <h2 class="col"><span class="en">Results</span><span class="ko">결과</span></h2>
-  <p class="col en">Each panel is one damage condition. A dot further left is a better repair; the vertical line is the undamaged model. The axis is logarithmic and stops at 10⁵, so anything worse is drawn at the right edge with its true value written beside it.</p>
-  <p class="col ko">패널 하나가 손상 조건 하나입니다. 점이 왼쪽에 있을수록 좋은 복구이고, 세로선은 손상 전 모델입니다. 축은 로그 스케일이며 10⁵에서 끊었습니다. 그보다 나쁜 값은 오른쪽 끝에 그리고 실제 값을 옆에 적었습니다.</p>
-  <div class="figure">
-    <div class="legend">
-      <span><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="var(--accent)"/></svg><span class="en">Claude model repair</span><span class="ko">Claude 모델 복구</span></span>
-      <span><svg width="14" height="14" aria-hidden="true"><rect x="2.5" y="2.5" width="9" height="9" fill="var(--scripted)"/></svg><span class="en">Scripted baseline (no LLM)</span><span class="ko">스크립트 기준선 (LLM 없음)</span></span>
-      <span><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="var(--surface)" stroke="var(--ink-2)" stroke-width="1.5"/></svg><span class="en">Damaged, no repair</span><span class="ko">손상 상태 (복구 없음)</span></span>
-      <span><svg width="14" height="14" aria-hidden="true"><line x1="7" y1="1" x2="7" y2="13" stroke="var(--clean)" stroke-width="1.5" stroke-dasharray="3 2"/></svg><span class="en">Undamaged model</span><span class="ko">손상 전 모델</span></span>
+  <!-- STICKY NAV -->
+  <nav class="sticky-nav">
+    <div class="container">
+      <div class="nav-pills lang-en">
+        <a class="nav-pill" href="#idea">The Idea</a>
+        <a class="nav-pill" href="#setup">Setup</a>
+        <a class="nav-pill" href="#damage">Four Kinds of Damage</a>
+        <a class="nav-pill" href="#results">Results at 1%</a>
+        <a class="nav-pill" href="#need">Is an LLM Needed?</a>
+        <a class="nav-pill" href="#dose">More Damage</a>
+        <a class="nav-pill" href="#weights">Function vs Weights</a>
+        <a class="nav-pill" href="#limits">Limits</a>
+        <a class="nav-pill" href="#reproduce">Reproduce</a>
+      </div>
+      <div class="nav-pills lang-ko">
+        <a class="nav-pill" href="#idea">아이디어</a>
+        <a class="nav-pill" href="#setup">실험 절차</a>
+        <a class="nav-pill" href="#damage">네 가지 손상</a>
+        <a class="nav-pill" href="#results">1% 결과</a>
+        <a class="nav-pill" href="#need">LLM이 필요한가</a>
+        <a class="nav-pill" href="#dose">더 큰 손상</a>
+        <a class="nav-pill" href="#weights">기능 vs 가중치</a>
+        <a class="nav-pill" href="#limits">한계</a>
+        <a class="nav-pill" href="#reproduce">재현</a>
+      </div>
     </div>
-    <div class="panels" id="panels"></div>
-    <p class="cap en">Held-out WikiText-2 test perplexity (first 40,000 tokens, 512-token windows). One run per model per condition.</p>
-    <p class="cap ko">Held-out WikiText-2 테스트 perplexity(앞 40,000 토큰, 512 토큰 윈도). 모델·조건당 1회 실행.</p>
-  </div>
+  </nav>
 
-  <div class="col" style="display:flex;flex-direction:column;gap:.6rem">
-    <h3><span class="en">All metrics</span><span class="ko">전체 지표</span></h3>
-    <div class="seg" role="group" aria-label="Metric" id="metricSeg"></div>
-  </div>
-  <div class="tablewrap"><table id="main"></table></div>
-  <p class="cap en" id="metricNoteEn"></p><p class="cap ko" id="metricNoteKo"></p>
-</section>
+  <main class="container">
 
-<section>
-  <h2 class="col"><span class="en">What the models did</span><span class="ko">모델들이 한 일</span></h2>
-  <div class="cases">
-    <div class="case"><h3><span class="en">A · Scattered erasure</span><span class="ko">A · 산발 소거</span></h3>
-      <p class="en">All four noticed that trained weights are never exactly zero, so the zeros mark the damage. Opus and Fable traced the collapse to the token embedding and filled each missing entry from its row and column statistics, reaching 30.2 and 30.4. Sonnet and Haiku used low-rank matrix completion, which fits the embedding less well (36.5 and 51.1); Haiku left 23% of the zeros untouched.</p>
-      <p class="ko">네 모델 모두 "학습된 가중치는 정확히 0인 경우가 없으므로 0이 손상 표시"라는 점을 알아챘습니다. Opus와 Fable은 붕괴 원인이 토큰 임베딩임을 추적해 각 결측 항목을 행·열 통계로 채웠고 30.2와 30.4에 도달했습니다. Sonnet과 Haiku는 저랭크 행렬 완성을 썼는데 임베딩에는 덜 맞았습니다(36.5, 51.1). Haiku는 0의 23%를 그대로 뒀습니다.</p></div>
-    <div class="case"><h3><span class="en">B · Scattered noise</span><span class="ko">B · 산발 노이즈</span></h3>
-      <p class="en">The hardest case. A third or so of the noisy entries fall inside the normal range of the weights, and GPT-2's real weights have heavy tails, so cleaning aggressively deletes real weights. Fable estimated the noise scale correctly (about 10σ) and built a local scale model per matrix, reaching 81. Opus protected a handful of genuinely huge weights and reached 1,507. Sonnet and Haiku did not produce a usable model.</p>
-      <p class="ko">가장 어려운 조건입니다. 노이즈 항목의 3분의 1가량은 가중치의 정상 범위 안에 들어가고, GPT-2의 실제 가중치는 꼬리가 두꺼워서 공격적으로 청소하면 진짜 가중치가 지워집니다. Fable은 노이즈 크기(약 10σ)를 맞게 추정하고 행렬별 국소 스케일 모델을 세워 81에 도달했습니다. Opus는 실제로 큰 소수의 가중치를 보호해 1,507에 도달했습니다. Sonnet과 Haiku는 쓸 수 있는 모델을 만들지 못했습니다.</p></div>
-    <div class="case"><h3><span class="en">C · Block erasure</span><span class="ko">C · 블록 소거</span></h3>
-      <p class="en">The easiest case, and the only one with no spread between models: 30.8 to 31.0 for all four. The zeroed rectangle is obvious, and each model filled it by ridge regression from the intact rows and columns of the same matrix.</p>
-      <p class="ko">가장 쉬운 조건이고, 모델 간 차이가 없었던 유일한 조건입니다. 네 모델 모두 30.8–31.0입니다. 0이 된 직사각형은 한눈에 보이고, 각 모델은 같은 행렬의 온전한 행·열로부터 릿지 회귀로 그 블록을 채웠습니다.</p></div>
-    <div class="case"><h3><span class="en">D · Block noise</span><span class="ko">D · 블록 노이즈</span></h3>
-      <p class="en">Nothing marks the damage: the block holds noise of the same size as real weights. Fable located the block in all 50 matrices (99.3% of damaged entries found, 99.3% of its edits on target) and reached 30.5. Opus found 25 of 50 and reached 38.4. Sonnet did not find the block structure. Haiku found no helpful edit and said so, returning the checkpoint unchanged.</p>
-      <p class="ko">손상을 표시하는 것이 아무것도 없습니다. 블록에는 실제 가중치와 같은 크기의 노이즈가 들어 있습니다. Fable은 50개 행렬 전부에서 블록 위치를 찾아(손상 항목의 99.3% 탐지, 수정의 99.3%가 적중) 30.5에 도달했습니다. Opus는 50개 중 25개를 찾아 38.4에 도달했습니다. Sonnet은 블록 구조를 찾지 못했습니다. Haiku는 도움이 되는 수정을 찾지 못했다고 밝히고 체크포인트를 그대로 제출했습니다.</p></div>
-  </div>
-</section>
+    <!-- §1 IDEA -->
+    <section id="idea">
+      <span class="section-tag">§1 · The Idea</span>
+      <div class="lang-en">
+        <h2>A Book With Smudged Letters, and No Second Copy</h2>
+        <p>
+          A language model is, physically, a file of numbers called <strong>weights</strong>. GPT-2 has 124 million of them. Nobody wrote those numbers: they were found by training.
+          Our <a href="https://statsleelab.github.io/weight_space_programming/" target="_blank" rel="noopener">earlier work</a> reproduced a surprising result: a frontier LLM can read and write the weights of small networks directly, the way a programmer edits code.
+        </p>
+        <p>
+          This study asks the next question. Suppose the file gets damaged, so that some of the numbers are wrong. <strong>Can a frontier LLM look at the damaged file and fix it?</strong>
+          Think of a book in which one letter in a hundred has been smudged, and there is no second copy. A careful reader can often spot the smudges and write in something sensible. We tested whether an LLM can do the same for a neural network.
+        </p>
+        <div class="callout">
+          <strong>The rule that makes it hard:</strong> the repairing model never sees the answer. It gets only the damaged file. It cannot download the original, and it cannot retrain the model. It can read the numbers, run the broken model to see how it misbehaves, do statistics, and then write new numbers.
+        </div>
+      </div>
+      <div class="lang-ko">
+        <h2>글자가 번진 책, 그리고 사본은 없다</h2>
+        <p>
+          언어 모델은 물리적으로는 <strong>가중치</strong>라고 부르는 숫자들이 담긴 파일입니다. GPT-2에는 1억 2,400만 개가 있습니다. 이 숫자는 누가 쓴 것이 아니라 학습으로 찾아낸 것입니다.
+          <a href="https://statsleelab.github.io/weight_space_programming/" target="_blank" rel="noopener">이전 연구</a>에서 우리는 놀라운 결과 하나를 재현했습니다. 프런티어 LLM은 프로그래머가 코드를 고치듯 작은 신경망의 가중치를 직접 읽고 쓸 수 있습니다.
+        </p>
+        <p>
+          이번 연구는 그다음 질문을 던집니다. 파일이 손상돼 숫자 일부가 틀려졌다고 합시다. <strong>프런티어 LLM이 그 손상된 파일을 보고 고칠 수 있을까요?</strong>
+          백 글자 중 한 글자가 번졌는데 사본이 없는 책을 떠올리면 됩니다. 주의 깊은 독자는 번진 곳을 찾아내 그럴듯한 글자를 써 넣을 수 있습니다. LLM이 신경망에 대해 같은 일을 할 수 있는지 시험했습니다.
+        </p>
+        <div class="callout">
+          <strong>이 과제를 어렵게 만드는 규칙:</strong> 복구하는 모델은 정답을 절대 보지 못합니다. 손상된 파일만 받습니다. 원본을 내려받을 수 없고 모델을 다시 학습시킬 수도 없습니다. 숫자를 읽고, 망가진 모델을 돌려 어떻게 오작동하는지 보고, 통계를 낸 뒤, 새 숫자를 써 넣을 수 있을 뿐입니다.
+        </div>
+      </div>
 
-<section>
-  <h2 class="col"><span class="en">Follow-up: more damage, stronger scripts</span><span class="ko">후속 실험: 더 큰 손상, 더 강한 스크립트</span></h2>
-  <p class="col en">The first round left two questions open. Is 1% a special dose? And were the scripted baselines too weak to be a fair comparison? We wrote stronger blind scripts, ran them at five doses from 0.1% to 30%, and then sent the four Claude models into the three cells where the scripts fell furthest short.</p>
-  <p class="col ko">첫 실험은 두 가지 질문을 남겼습니다. 1%가 특별한 용량인가? 스크립트 기준선이 공정한 비교가 되기에는 너무 약했던 것 아닌가? 그래서 더 강한 블라인드 스크립트를 만들어 0.1%부터 30%까지 다섯 용량에서 돌렸고, 스크립트가 가장 크게 뒤처진 세 지점에 네 개의 Claude 모델을 투입했습니다.</p>
-  <div class="col" style="display:flex;flex-direction:column;gap:.4rem">
-  <ul class="en">
-    <li><strong>Best blind script.</strong> Four repair pipelines are run and the one with the lowest development perplexity is kept (or none, if nothing helps): ridge imputation of exact zeros; outlier detection with a two-component mixture model in two settings, then ridge imputation; and a rectangle scan for blocks the rest of the matrix cannot predict, then ridge imputation.</li>
-    <li><strong>Ceiling.</strong> The same ridge imputation when the script is told exactly which entries are damaged. No blind method should beat it by much; the gap between a repair and this line is the cost of not knowing where the damage is.</li>
-  </ul>
-  <ul class="ko">
-    <li><strong>최선의 블라인드 스크립트.</strong> 네 가지 복구 파이프라인을 돌려 개발 perplexity가 가장 낮은 것을 고릅니다(아무것도 도움이 안 되면 그대로 둡니다). 정확한 0의 릿지 대치, 두 가지 설정의 2성분 혼합 모형 이상치 탐지 후 릿지 대치, 그리고 행렬의 나머지로 예측되지 않는 직사각형 블록 탐색 후 릿지 대치입니다.</li>
-    <li><strong>상한.</strong> 어떤 항목이 손상됐는지 정확히 알려 준 상태에서 같은 릿지 대치를 한 결과입니다. 블라인드 방법이 이를 크게 넘을 수는 없으므로, 복구 결과와 이 선 사이의 간격이 "손상 위치를 모르는 비용"입니다.</li>
-  </ul>
-  </div>
-  <div class="figure">
-    <div class="legend">
-      <span><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="var(--accent)"/></svg><span class="en">Claude model (F, O, S, H)</span><span class="ko">Claude 모델 (F, O, S, H)</span></span>
-      <span><svg width="22" height="14" aria-hidden="true"><line x1="0" y1="7" x2="22" y2="7" stroke="var(--scripted)" stroke-width="2"/><rect x="6.5" y="2.5" width="9" height="9" fill="var(--scripted)"/></svg><span class="en">Best blind script</span><span class="ko">최선의 블라인드 스크립트</span></span>
-      <span><svg width="22" height="14" aria-hidden="true"><line x1="0" y1="7" x2="22" y2="7" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="4 3"/></svg><span class="en">Ceiling (damage mask known)</span><span class="ko">상한 (손상 마스크 공개)</span></span>
-      <span><svg width="22" height="14" aria-hidden="true"><line x1="0" y1="7" x2="22" y2="7" stroke="var(--clean)" stroke-width="1" stroke-dasharray="1 3"/></svg><span class="en">Undamaged model</span><span class="ko">손상 전 모델</span></span>
-    </div>
-    <div class="panels" id="dosePanels"></div>
-    <p class="cap en">Held-out perplexity against the share of weights damaged; lower is better. Log scale, cut off at 10⁵: anything worse sits on the top edge. Scored on a reduced suite (8,192 WikiText-2 test tokens), so the undamaged model reads 32.2 here instead of 28.9. One run per point, one seed.</p>
-    <p class="cap ko">손상된 가중치 비율에 따른 held-out perplexity. 낮을수록 좋습니다. 로그 스케일이며 10⁵에서 끊었고, 그보다 나쁜 값은 위쪽 끝에 그렸습니다. 축소 벤치마크(WikiText-2 테스트 8,192 토큰)로 채점해 손상 전 모델이 28.9가 아니라 32.2로 나옵니다. 점마다 1회 실행, 시드 하나.</p>
-  </div>
-  <div class="col" style="display:flex;flex-direction:column;gap:.6rem">
-    <h3><span class="en">The cells where nothing marks the damage</span><span class="ko">손상에 아무 표시가 없는 지점들</span></h3>
-  </div>
-  <div class="tablewrap"><table id="doseTable"></table></div>
-  <p class="cap en">Held-out perplexity on the reduced suite. * = checkpoint returned unchanged. The 1% columns re-score the first-round repairs on that suite. Models were told the damaged share (0.1%, 1% or 3%); the scripts were not.</p>
-  <p class="cap ko">축소 벤치마크 기준 held-out perplexity. * = 체크포인트를 그대로 제출. 1% 열은 첫 실험의 복구본을 같은 벤치마크로 다시 채점한 값입니다. 모델에게는 손상 비율(0.1%, 1%, 3%)을 알려 주었고, 스크립트에는 알려 주지 않았습니다.</p>
-  <div class="col" style="display:flex;flex-direction:column;gap:1rem">
-  <ul class="en">
-    <li><strong>Erasure never needed a model.</strong> At every dose the blind script sits on the ceiling, because zeros mark the damage. What degrades is the ceiling itself: about 39–41 at 3%, 180–280 at 10%, unusable at 30%.</li>
-    <li><strong>Block noise: Fable stayed on the ceiling as the dose tripled.</strong> At 3% it scored 40.3 against a ceiling of 40.0, having placed 99.7% of its edits on damaged entries. The best script reached 67.3. Larger blocks were also easier to find: Opus and Sonnet, which found half or none of the 1% blocks, located almost all of the 3% ones (43.4 and 48.1). Haiku again found nothing and returned the checkpoint unchanged (259.6).</li>
-    <li><strong>Scattered noise: the scripts fail at every dose, and the models only partly succeed.</strong> Even at 0.1% no script produced a working model, though the ceiling is 32.6. Fable reached 53.6 at 0.1%, 86.7 at 1% and 1,426 at 3%; the ceiling over the same range moves only from 32.6 to 39.6. The other three models were far behind at every dose.</li>
-    <li><strong>So the hypothesis holds in a specific region.</strong> A frontier model adds something scripts did not where the damage is unmarked. It matches perfect detection when the damage has structure to find (a block), and falls short, increasingly with dose, when the damage is scattered and overlaps the natural spread of the weights.</li>
-  </ul>
-  <ul class="ko">
-    <li><strong>소거에는 처음부터 모델이 필요 없었습니다.</strong> 0이 손상 위치를 알려 주므로 모든 용량에서 블라인드 스크립트가 상한과 같습니다. 나빠지는 것은 상한 자체입니다. 3%에서 약 39–41, 10%에서 180–280, 30%에서는 쓸 수 없는 수준입니다.</li>
-    <li><strong>블록 노이즈: 용량이 3배가 되어도 Fable은 상한에 머물렀습니다.</strong> 3%에서 상한 40.0 대비 40.3이었고, 수정의 99.7%가 손상 항목에 적중했습니다. 최선의 스크립트는 67.3이었습니다. 블록이 커지자 찾기도 쉬워졌습니다. 1% 블록을 절반만 찾거나 못 찾았던 Opus와 Sonnet이 3% 블록은 거의 다 찾았습니다(43.4, 48.1). Haiku는 이번에도 아무것도 찾지 못하고 체크포인트를 그대로 제출했습니다(259.6).</li>
-    <li><strong>산발 노이즈: 스크립트는 모든 용량에서 실패했고, 모델은 부분적으로만 성공했습니다.</strong> 상한이 32.6인 0.1%에서도 작동하는 모델을 만든 스크립트는 없었습니다. Fable은 0.1%에서 53.6, 1%에서 86.7, 3%에서 1,426이었고, 같은 구간에서 상한은 32.6에서 39.6으로만 움직입니다. 나머지 세 모델은 모든 용량에서 한참 뒤처졌습니다.</li>
-    <li><strong>따라서 가설은 특정 영역에서 성립합니다.</strong> 손상에 표시가 없는 곳에서 프런티어 모델은 스크립트가 하지 못한 일을 합니다. 손상에 찾아낼 구조(블록)가 있으면 완벽한 탐지와 같은 수준에 이르고, 손상이 흩어져 가중치의 자연스러운 분포와 겹치면 용량이 커질수록 더 못 미칩니다.</li>
-  </ul>
-  <p class="en">Why scattered noise stays hard: the scripts' outlier models did flag between a quarter and three quarters of the noisy entries, but the model stays collapsed unless nearly every wrong entry in a few high-gain token-embedding columns is caught. Fable's reports show it identified those columns, explained why single wrong entries there let one token win every prediction, and handled them and GPT-2's genuinely huge weights separately. That step came from running the damaged model and reasoning about its output, which is the part the scripts do not have.</p>
-  <p class="ko">산발 노이즈가 계속 어려운 이유: 스크립트의 이상치 모형도 노이즈 항목의 4분의 1에서 4분의 3은 표시했습니다. 하지만 이득이 큰 몇 개의 토큰 임베딩 열에서 잘못된 항목을 거의 전부 잡아내지 못하면 모델은 붕괴 상태로 남습니다. Fable의 보고서를 보면, 그 열들을 찾아내고 거기서 항목 하나만 틀려도 한 토큰이 모든 예측을 차지하게 되는 이유를 설명한 뒤, 그 열들과 GPT-2의 실제로 큰 가중치를 따로 처리했습니다. 이 단계는 손상된 모델을 실행하고 그 출력을 해석하는 데서 나왔고, 스크립트에는 없는 부분입니다.</p>
-  </div>
-</section>
+      <div class="glossary lang-en">
+        <div class="card"><div class="term">Weights</div>The numbers inside a neural network. They are stored in tables (matrices); GPT-2 has 50 large ones.</div>
+        <div class="card"><div class="term">Perplexity</div>How surprised the model is by ordinary text. <strong>Lower is better.</strong> Healthy GPT-2 scores 28.9. Above a few hundred, its writing is nonsense.</div>
+        <div class="card"><div class="term">Collapsed</div>A model so broken it repeats one word forever. Its perplexity is astronomically large, so we just write "collapsed".</div>
+        <div class="card"><div class="term">Blind</div>Working without the answer: no original weights and no map of which entries were damaged.</div>
+      </div>
+      <div class="glossary lang-ko">
+        <div class="card"><div class="term">가중치</div>신경망 안의 숫자들입니다. 표(행렬) 형태로 저장되며, GPT-2에는 큰 행렬이 50개 있습니다.</div>
+        <div class="card"><div class="term">Perplexity</div>모델이 평범한 글을 보고 얼마나 "놀라는지"입니다. <strong>낮을수록 좋습니다.</strong> 정상 GPT-2는 28.9이고, 수백을 넘으면 쓰는 글이 말이 되지 않습니다.</div>
+        <div class="card"><div class="term">붕괴</div>한 단어만 끝없이 반복할 만큼 망가진 상태입니다. Perplexity가 천문학적으로 커서 그냥 "붕괴"라고 적습니다.</div>
+        <div class="card"><div class="term">블라인드</div>정답 없이 작업한다는 뜻입니다. 원본 가중치도, 어떤 항목이 손상됐는지 알려 주는 지도도 없습니다.</div>
+      </div>
+    </section>
 
-<section class="col">
-  <h2><span class="en">Function came back; the weights did not</span><span class="ko">기능은 돌아왔지만 가중치는 돌아오지 않았다</span></h2>
-  <p class="en">The table below compares each best repair with the hidden original, entry by entry. A residual of 1.00 means the damaged entries are as far from the truth as before; 0 means perfectly restored. Condition B reads differently: its noise is ten times larger than the weights, so simply deleting a noisy entry removes most of the error without recovering the value underneath.</p>
-  <p class="ko">아래 표는 가장 좋은 복구를 숨겨 둔 원본과 항목 단위로 비교한 것입니다. 잔차 1.00은 손상 항목이 복구 전만큼 원본에서 멀다는 뜻이고, 0은 완벽한 복원입니다. 조건 B는 다르게 읽어야 합니다. 노이즈가 가중치보다 10배 커서, 노이즈 항목을 지우기만 해도 그 밑의 값을 되찾지 않은 채 오차 대부분이 사라집니다.</p>
-  <div class="tablewrap"><table id="resid"></table></div>
-  <p class="en">Position embeddings vary smoothly from one position to the next, so they can be reconstructed almost exactly. Token embeddings are partly predictable from similar tokens. Attention and MLP matrices are close to unpredictable from their own statistics, and the models said so in their reports. The network tolerates that: with 1% of those entries merely set to a reasonable value, perplexity moves by about one point.</p>
-  <p class="ko">위치 임베딩은 위치에 따라 매끄럽게 변하므로 거의 정확히 재구성됩니다. 토큰 임베딩은 비슷한 토큰으로부터 부분적으로 예측됩니다. 어텐션과 MLP 행렬은 자체 통계만으로는 거의 예측되지 않으며, 모델들도 보고서에 그렇게 적었습니다. 네트워크는 이를 견딥니다. 이 항목들의 1%가 그럴듯한 값으로만 채워져도 perplexity는 1 정도밖에 움직이지 않습니다.</p>
-  <h3><span class="en">How much of this needs an LLM?</span><span class="ko">이 중 얼마만큼에 LLM이 필요한가?</span></h3>
-  <div id="baselineNote"></div>
-</section>
+    <!-- §2 SETUP -->
+    <section id="setup">
+      <span class="section-tag">§2 · Experimental Setup</span>
+      <div class="lang-en"><h2>Three Steps: Break It, Repair It Blind, Score It Fairly</h2></div>
+      <div class="lang-ko"><h2>세 단계: 망가뜨리고, 블라인드로 고치고, 공정하게 채점한다</h2></div>
+      <div class="grid-3">
+        <div class="card" style="margin-top:0;">
+          <h3 style="margin-top:0;color:var(--danger);"><span class="lang-en">① Break</span><span class="lang-ko">① 손상</span></h3>
+          <p class="lang-en" style="font-size:14px;">We corrupt 1% of the entries in each of GPT-2's 50 weight matrices. Then we lock away everything that could give the answer: the original weights, the list of damaged entries, and the test data. All of it is encrypted while the repair runs.</p>
+          <p class="lang-ko" style="font-size:14px;">GPT-2의 가중치 행렬 50개 각각에서 항목의 1%를 망가뜨립니다. 그런 다음 정답이 될 수 있는 것을 모두 잠급니다. 원본 가중치, 손상된 항목 목록, 테스트 데이터를 복구가 진행되는 동안 암호화해 둡니다.</p>
+        </div>
+        <div class="card" style="margin-top:0;">
+          <h3 style="margin-top:0;color:var(--accent);"><span class="lang-en">② Repair blind</span><span class="lang-ko">② 블라인드 복구</span></h3>
+          <p class="lang-en" style="font-size:14px;">Each Claude model works alone in a folder with the damaged file, a short program that runs GPT-2, and a page of practice text. It is told only: "about 1% of the entries are wrong." It may use statistics and linear algebra. It may not train, and it has about 40 minutes.</p>
+          <p class="lang-ko" style="font-size:14px;">각 Claude 모델은 손상된 파일, GPT-2를 실행하는 짧은 프로그램, 연습용 텍스트 한 편만 있는 폴더에서 혼자 작업합니다. 알려 주는 것은 "항목의 약 1%가 틀렸다"뿐입니다. 통계와 선형대수는 쓸 수 있지만 학습은 할 수 없고, 시간은 약 40분입니다.</p>
+        </div>
+        <div class="card" style="margin-top:0;">
+          <h3 style="margin-top:0;color:var(--success);"><span class="lang-en">③ Score</span><span class="lang-ko">③ 채점</span></h3>
+          <p class="lang-en" style="font-size:14px;">After every run has ended we unlock the answer key and test each repaired model on text it never saw: perplexity on Wikipedia articles, a grammar test (BLiMP) and a facts test (capital cities). We also compare every repaired number with the original.</p>
+          <p class="lang-ko" style="font-size:14px;">모든 실행이 끝난 뒤 정답을 풀고, 복구된 모델을 한 번도 보지 못한 글로 시험합니다. 위키백과 글의 perplexity, 문법 시험(BLiMP), 사실 시험(수도 맞히기)입니다. 복구된 숫자 하나하나를 원본과도 비교합니다.</p>
+        </div>
+      </div>
+      <p class="lang-en" style="margin-top:18px;">We ran this for four Claude models on four kinds of damage (16 runs), and later on three harder cases (12 more runs). Every script each model wrote, and its own report, is in the repository.</p>
+      <p class="lang-ko" style="margin-top:18px;">네 개의 Claude 모델과 네 가지 손상에 대해 실행했고(16회), 나중에 더 어려운 세 경우를 추가했습니다(12회). 각 모델이 작성한 스크립트와 자체 보고서는 모두 저장소에 있습니다.</p>
+    </section>
 
-<section class="col">
-  <h2><span class="en">Limits of this study</span><span class="ko">이 연구의 한계</span></h2>
-  <ul class="en">
-    <li><strong>One run per cell.</strong> Twenty-eight runs (sixteen at 1%, twelve in the follow-up), one seed, no repeats. The ordering on the hard conditions (B and D) is large; differences of a few percent elsewhere are not established.</li>
-    <li><strong>GPT-2, not Qwen or Gemma.</strong> The run environment could not reach the hosts those models are published on. GPT-2's tied embedding with near-constant columns makes it unusually fragile, which shapes these results.</li>
-    <li><strong>Isolation was by instruction and audit, not by sandbox.</strong> The answer key was encrypted during the runs and the agents' saved scripts contain no network calls or gradient code, but the agents shared one machine with network access.</li>
-    <li><strong>Development text was used for selection.</strong> Models could compare a handful of candidate repairs on dev perplexity. Scores reported here are on separate test data.</li>
-    <li><strong>Small benchmarks.</strong> The capitals test has 80 items (standard error about 0.055), and perplexity uses 40,000 tokens.</li>
-    <li><strong>Budgets were soft.</strong> Models were asked to stay near 40 minutes; one run took 78.</li>
-    <li><strong>"Scripts fail" means these scripts.</strong> The stronger baselines were written in an afternoon, after the first-round reports had been read, by the same model family that ran the experiment. A script that hard-codes Fable's handling of the high-gain embedding columns would probably do much better on scattered noise. The claim is that the models worked this out unaided, not that no script could.</li>
-    <li><strong>The follow-up is not a full grid for the models.</strong> Models ran only in the noise conditions at 0.1%, 1% and 3%. They were told the damaged share; the scripts estimated it. The dose curve uses a reduced suite of 8,192 test tokens and 670 BLiMP pairs.</li>
-  </ul>
-  <ul class="ko">
-    <li><strong>셀당 실행 1회.</strong> 28개 실행(1%에서 16개, 후속 실험에서 12개), 시드 하나, 반복 없음. 어려운 조건(B, D)의 순위 차이는 크지만, 그 밖의 몇 퍼센트 차이는 확립된 것이 아닙니다.</li>
-    <li><strong>Qwen·Gemma가 아니라 GPT-2.</strong> 실행 환경에서 해당 모델이 공개된 호스트에 접근할 수 없었습니다. GPT-2는 거의 상수인 열을 가진 임베딩을 출력층과 공유해 유난히 취약하며, 이 점이 결과에 영향을 줍니다.</li>
-    <li><strong>격리는 샌드박스가 아니라 지시와 감사로 했습니다.</strong> 실행 중 정답 키는 암호화돼 있었고 에이전트가 남긴 스크립트에 네트워크 호출이나 그래디언트 코드는 없지만, 에이전트들은 네트워크가 열린 한 대의 머신을 공유했습니다.</li>
-    <li><strong>개발용 텍스트가 선택에 쓰였습니다.</strong> 모델은 소수의 후보 복구를 dev perplexity로 비교할 수 있었습니다. 여기 보고한 점수는 별도의 테스트 데이터 기준입니다.</li>
-    <li><strong>벤치마크가 작습니다.</strong> 수도 테스트는 80문항(표준오차 약 0.055)이고 perplexity는 40,000 토큰 기준입니다.</li>
-    <li><strong>예산은 권고였습니다.</strong> 40분 안팎을 요청했지만 한 실행은 78분이 걸렸습니다.</li>
-    <li><strong>"스크립트가 실패했다"는 이 스크립트들에 대한 말입니다.</strong> 강한 기준선은 첫 실험의 보고서를 읽은 뒤, 실험을 진행한 것과 같은 계열의 모델이 반나절 동안 작성했습니다. 이득이 큰 임베딩 열을 Fable처럼 처리하도록 직접 짜 넣은 스크립트라면 산발 노이즈에서 훨씬 나을 것입니다. 주장하는 바는 모델이 이를 도움 없이 알아냈다는 것이지, 어떤 스크립트로도 불가능하다는 것이 아닙니다.</li>
-    <li><strong>후속 실험에서 모델은 전체 격자를 돌지 않았습니다.</strong> 모델은 노이즈 조건의 0.1%, 1%, 3%에서만 실행했습니다. 모델에게는 손상 비율을 알려 주었고 스크립트는 스스로 추정했습니다. 용량 곡선은 테스트 8,192 토큰과 BLiMP 670쌍의 축소 벤치마크를 씁니다.</li>
-  </ul>
-</section>
+    <!-- §3 DAMAGE -->
+    <section id="damage">
+      <span class="section-tag">§3 · Four Kinds of Damage</span>
+      <div class="lang-en">
+        <h2>Where the Damage Sits, and Whether It Leaves a Mark</h2>
+        <p>Two questions define each kind of damage. <strong>Where?</strong> Either scattered at random, like specks of dust, or in one solid rectangle per matrix, like a torn-out paragraph. <strong>What happens to the numbers?</strong> Either they are erased to exactly zero, or they are replaced by random noise. The difference matters: a zero is easy to spot, because trained weights are almost never exactly zero. Noise leaves no such mark.</p>
+      </div>
+      <div class="lang-ko">
+        <h2>손상이 어디에 있고, 흔적을 남기는가</h2>
+        <p>손상의 종류는 두 가지 질문으로 정해집니다. <strong>어디에?</strong> 먼지처럼 무작위로 흩어져 있거나, 찢겨 나간 문단처럼 행렬마다 직사각형 하나로 뭉쳐 있습니다. <strong>숫자가 어떻게 되는가?</strong> 정확히 0으로 지워지거나, 무작위 노이즈로 바뀝니다. 이 차이가 중요합니다. 학습된 가중치는 정확히 0인 경우가 거의 없어서 0은 쉽게 눈에 띕니다. 노이즈는 그런 흔적을 남기지 않습니다.</p>
+      </div>
+      <div class="grid-2" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;">
+        <div class="card" style="margin-top:0;"><div class="mini" data-mini="sz"></div>
+          <h3 style="margin-top:0;"><span class="lang-en">A · Scattered erasure</span><span class="lang-ko">A · 산발 소거</span></h3>
+          <p class="lang-en" style="font-size:13.5px;">Random entries set to zero. Easy to find, and yet the model collapses completely.</p>
+          <p class="lang-ko" style="font-size:13.5px;">무작위 항목이 0이 됩니다. 찾기는 쉽지만 모델은 완전히 붕괴합니다.</p></div>
+        <div class="card" style="margin-top:0;"><div class="mini" data-mini="sn"></div>
+          <h3 style="margin-top:0;"><span class="lang-en">B · Scattered noise</span><span class="lang-ko">B · 산발 노이즈</span></h3>
+          <p class="lang-en" style="font-size:13.5px;">Random entries get large random values added. Nothing marks them. The hardest case.</p>
+          <p class="lang-ko" style="font-size:13.5px;">무작위 항목에 큰 무작위 값이 더해집니다. 아무 표시가 없습니다. 가장 어려운 경우입니다.</p></div>
+        <div class="card" style="margin-top:0;"><div class="mini" data-mini="bz"></div>
+          <h3 style="margin-top:0;"><span class="lang-en">C · Block erasure</span><span class="lang-ko">C · 블록 소거</span></h3>
+          <p class="lang-en" style="font-size:13.5px;">One rectangle per matrix set to zero. Obvious at a glance. The easiest case.</p>
+          <p class="lang-ko" style="font-size:13.5px;">행렬마다 직사각형 하나가 0이 됩니다. 한눈에 보입니다. 가장 쉬운 경우입니다.</p></div>
+        <div class="card" style="margin-top:0;"><div class="mini" data-mini="bn"></div>
+          <h3 style="margin-top:0;"><span class="lang-en">D · Block noise</span><span class="lang-ko">D · 블록 노이즈</span></h3>
+          <p class="lang-en" style="font-size:13.5px;">One rectangle per matrix overwritten with noise the same size as real weights. Invisible to simple statistics.</p>
+          <p class="lang-ko" style="font-size:13.5px;">행렬마다 직사각형 하나가 실제 가중치와 같은 크기의 노이즈로 덮입니다. 단순한 통계로는 보이지 않습니다.</p></div>
+      </div>
+      <h3 style="margin-top:24px;"><span class="lang-en">How bad is each kind before any repair?</span><span class="lang-ko">복구 전에는 얼마나 나쁜가?</span></h3>
+      <div class="table-wrap"><table id="cond"></table></div>
+      <p class="caption lang-en">Healthy GPT-2 on the same tests: perplexity 28.9, grammar 0.830, capitals 0.563. Scattered damage is far more destructive than block damage of the same size, because it reaches every row of every matrix.</p>
+      <p class="caption lang-ko">같은 시험에서 정상 GPT-2는 perplexity 28.9, 문법 0.830, 수도 0.563입니다. 같은 양이라도 산발 손상이 블록 손상보다 훨씬 파괴적입니다. 모든 행렬의 모든 행에 닿기 때문입니다.</p>
+    </section>
 
-<section class="col">
-  <h2><span class="en">Reproduce</span><span class="ko">재현</span></h2>
-  <pre><code>git clone https://github.com/statsleelab/llm-weight-repair
-cd llm-weight-repair &amp;&amp; pip install -r requirements.txt
-bash scripts/fetch_assets.sh                      # GPT-2, WikiText-2, BLiMP
-python src/prepare.py assets secret               # clean + 4 damaged checkpoints
-# run a repair agent per TASK.md in agent_kit/, then:
+    <!-- §4 RESULTS -->
+    <section id="results">
+      <span class="section-tag">§4 · Results at 1% Damage</span>
+      <div class="lang-en">
+        <h2>Three Kinds Repaired; One Still Out of Reach</h2>
+        <p>Pick a kind of damage below. Each bar is one repair attempt, and <strong>a shorter bar is a better repair</strong>. The healthy model scores 28.9. The scale is logarithmic, so each step to the right is ten times worse.</p>
+      </div>
+      <div class="lang-ko">
+        <h2>세 가지는 복구했고, 하나는 아직 닿지 못했다</h2>
+        <p>아래에서 손상 종류를 고르세요. 막대 하나가 복구 시도 하나이고, <strong>막대가 짧을수록 좋은 복구</strong>입니다. 정상 모델은 28.9입니다. 로그 스케일이라 오른쪽으로 한 칸 갈 때마다 10배 나빠집니다.</p>
+      </div>
+      <div class="card">
+        <div class="tabs" id="caseTabs"></div>
+        <div id="casePanel"></div>
+      </div>
+
+      <h3 style="margin-top:28px;"><span class="lang-en">All scores in one table</span><span class="lang-ko">전체 점수 표</span></h3>
+      <div class="tabs" id="metricTabs" style="border-bottom:none;padding-bottom:0;margin-bottom:8px;"></div>
+      <div class="table-wrap"><table id="main"></table></div>
+      <p class="caption" id="metricNote"></p>
+    </section>
+
+    <!-- §5 NEED -->
+    <section id="need">
+      <span class="section-tag">§5 · How Much of This Needs an LLM?</span>
+      <div class="lang-en">
+        <h2>The Hard Part Is Finding the Damage, Not Filling It In</h2>
+        <p>A fair question: could a short ordinary script do the same job? We tested that with simple scripts, and with one script that cheats: we tell it exactly which entries are damaged, and it fills each with the average of its column. That cheating script is not a competitor. It is a yardstick for what perfect detection plus a crude fill is worth.</p>
+        <div id="needEn"></div>
+      </div>
+      <div class="lang-ko">
+        <h2>어려운 것은 손상을 찾는 일이지, 채우는 일이 아니다</h2>
+        <p>당연한 질문이 있습니다. 짧은 일반 스크립트로도 같은 일을 할 수 있지 않을까요? 단순한 스크립트들로 시험했고, 반칙을 하는 스크립트도 하나 넣었습니다. 어떤 항목이 손상됐는지 정확히 알려 주고, 각 항목을 그 열의 평균으로 채우게 한 것입니다. 이 반칙 스크립트는 경쟁자가 아닙니다. "완벽한 탐지 + 거친 채우기"가 어느 정도인지 재는 잣대입니다.</p>
+        <div id="needKo"></div>
+      </div>
+    </section>
+
+    <!-- §6 DOSE -->
+    <section id="dose">
+      <span class="section-tag">§6 · Follow-Up: More Damage, Stronger Scripts</span>
+      <div class="lang-en">
+        <h2>From 0.1% to 30% Damage: Where Scripts Stop Working</h2>
+        <p>The first round raised two doubts. Is 1% a special amount? And were our scripts too weak to be a fair comparison? So we wrote stronger automatic scripts, ran them at five damage levels, and then sent the four Claude models into the three cases where the scripts fell furthest short.</p>
+        <ul class="plain">
+          <li><strong>Best automatic script.</strong> It tries four repair recipes (fill zeros, two outlier detectors, a search for odd-looking rectangles) and keeps whichever makes the practice text read best.</li>
+          <li><strong>Ceiling.</strong> The same repair when we tell the script where the damage is. No blind method should beat this by much. The distance between a repair and the ceiling is the price of not knowing where the damage is.</li>
+        </ul>
+      </div>
+      <div class="lang-ko">
+        <h2>손상 0.1%에서 30%까지: 스크립트가 멈추는 곳</h2>
+        <p>첫 실험은 두 가지 의문을 남겼습니다. 1%가 특별한 양인가? 우리 스크립트가 공정한 비교가 되기에는 너무 약했던 것 아닌가? 그래서 더 강한 자동 스크립트를 만들어 다섯 가지 손상 수준에서 돌렸고, 스크립트가 가장 크게 뒤처진 세 경우에 네 개의 Claude 모델을 투입했습니다.</p>
+        <ul class="plain">
+          <li><strong>최선의 자동 스크립트.</strong> 네 가지 복구 방법(0 채우기, 이상치 탐지 두 가지, 이상해 보이는 직사각형 탐색)을 시도하고, 연습용 텍스트를 가장 잘 읽게 만드는 것을 고릅니다.</li>
+          <li><strong>상한.</strong> 손상 위치를 스크립트에 알려 주었을 때의 같은 복구입니다. 블라인드 방법이 이를 크게 넘을 수는 없습니다. 복구 결과와 상한 사이의 거리가 "손상 위치를 모르는 대가"입니다.</li>
+        </ul>
+      </div>
+      <div class="legend">
+        <span><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="var(--accent)"/></svg><span class="lang-en">Claude model (F, O, S, H)</span><span class="lang-ko">Claude 모델 (F, O, S, H)</span></span>
+        <span><svg width="22" height="14" aria-hidden="true"><line x1="0" y1="7" x2="22" y2="7" stroke="var(--muted-mark)" stroke-width="2"/><rect x="6.5" y="2.5" width="9" height="9" fill="var(--muted-mark)"/></svg><span class="lang-en">Best automatic script</span><span class="lang-ko">최선의 자동 스크립트</span></span>
+        <span><svg width="22" height="14" aria-hidden="true"><line x1="0" y1="7" x2="22" y2="7" stroke="var(--text-muted)" stroke-width="1.5" stroke-dasharray="4 3"/></svg><span class="lang-en">Ceiling (damage location known)</span><span class="lang-ko">상한 (손상 위치 공개)</span></span>
+        <span><svg width="22" height="14" aria-hidden="true"><line x1="0" y1="7" x2="22" y2="7" stroke="var(--text)" stroke-width="1" stroke-dasharray="1 3"/></svg><span class="lang-en">Healthy model</span><span class="lang-ko">정상 모델</span></span>
+      </div>
+      <div class="panels" id="dosePanels"></div>
+      <p class="caption lang-en">Perplexity (vertical, log scale; lower is better) against the share of weights damaged (horizontal). Anything worse than 100,000 is drawn on the top edge. These runs use a smaller test set, on which the healthy model scores 32.2 instead of 28.9. One run per point.</p>
+      <p class="caption lang-ko">세로축은 perplexity(로그 스케일, 낮을수록 좋음), 가로축은 손상된 가중치 비율입니다. 100,000보다 나쁜 값은 위쪽 끝에 그렸습니다. 이 실행들은 더 작은 테스트 세트를 써서 정상 모델이 28.9가 아니라 32.2로 나옵니다. 점마다 1회 실행.</p>
+
+      <h3 style="margin-top:26px;"><span class="lang-en">The cases where nothing marks the damage</span><span class="lang-ko">손상에 아무 표시가 없는 경우들</span></h3>
+      <div class="table-wrap"><table id="doseTable"></table></div>
+      <p class="caption lang-en">Perplexity on the smaller test set. * = the model changed nothing and returned the file as it was. Models were told the damaged share; scripts had to estimate it.</p>
+      <p class="caption lang-ko">더 작은 테스트 세트 기준 perplexity. * = 모델이 아무것도 바꾸지 않고 파일을 그대로 제출. 모델에게는 손상 비율을 알려 주었고, 스크립트는 스스로 추정했습니다.</p>
+
+      <div class="grid-3" style="margin-top:20px;">
+        <div class="card" style="margin-top:0;">
+          <h3 style="margin-top:0;color:var(--success);"><span class="lang-en">Erasure: no LLM needed</span><span class="lang-ko">소거: LLM이 필요 없음</span></h3>
+          <p class="lang-en" style="font-size:14px;">At every damage level the script sits right on the ceiling, because zeros show where the damage is. What gets worse is the ceiling itself: about 40 at 3%, around 200 at 10%, unusable at 30%. Beyond a point, too much is simply gone.</p>
+          <p class="lang-ko" style="font-size:14px;">0이 손상 위치를 보여 주므로 모든 손상 수준에서 스크립트가 상한과 같습니다. 나빠지는 것은 상한 자체입니다. 3%에서 약 40, 10%에서 200 안팎, 30%에서는 쓸 수 없습니다. 어느 선을 넘으면 사라진 것이 너무 많습니다.</p>
+        </div>
+        <div class="card" style="margin-top:0;">
+          <h3 style="margin-top:0;color:var(--accent);"><span class="lang-en">Noise blocks: Fable matches the ceiling</span><span class="lang-ko">노이즈 블록: Fable이 상한에 도달</span></h3>
+          <p class="lang-en" style="font-size:14px;">At 3% damage Fable scored 40.3 against a ceiling of 40.0, with 99.7% of its edits landing on damaged entries. The best script managed 67.3. Bigger blocks were easier to find: Opus and Sonnet located almost all of them at 3%. Haiku found nothing at either level and said so.</p>
+          <p class="lang-ko" style="font-size:14px;">3% 손상에서 Fable은 상한 40.0 대비 40.3이었고, 수정의 99.7%가 손상 항목에 적중했습니다. 최선의 스크립트는 67.3이었습니다. 블록이 클수록 찾기 쉬워서 3%에서는 Opus와 Sonnet도 거의 다 찾았습니다. Haiku는 두 수준 모두에서 아무것도 찾지 못했고 그렇게 보고했습니다.</p>
+        </div>
+        <div class="card" style="margin-top:0;">
+          <h3 style="margin-top:0;color:var(--danger);"><span class="lang-en">Scattered noise: still unsolved</span><span class="lang-ko">산발 노이즈: 아직 미해결</span></h3>
+          <p class="lang-en" style="font-size:14px;">No script produced a working model at any level, not even 0.1%, although the ceiling there is 32.6. Fable reached 53.6 at 0.1%, 86.7 at 1% and 1,426 at 3%. It is the only repair that works at all, and it falls further behind as damage grows.</p>
+          <p class="lang-ko" style="font-size:14px;">어떤 스크립트도 어떤 수준에서도 작동하는 모델을 만들지 못했습니다. 상한이 32.6인 0.1%에서도 그랬습니다. Fable은 0.1%에서 53.6, 1%에서 86.7, 3%에서 1,426이었습니다. 그나마 작동하는 유일한 복구이지만, 손상이 커질수록 더 뒤처집니다.</p>
+        </div>
+      </div>
+      <div class="callout green lang-en">
+        <strong>So where does the hypothesis hold?</strong> A frontier model adds something scripts did not exactly where the damage leaves no mark. When the hidden damage has a shape to find (a block), the model does as well as if it had been told the answer. When the hidden damage is scattered and blends into the natural spread of the weights, the model beats the scripts but stays well short of the ceiling.
+      </div>
+      <div class="callout green lang-ko">
+        <strong>그래서 가설은 어디에서 성립하는가?</strong> 손상이 흔적을 남기지 않는 바로 그 지점에서 프런티어 모델은 스크립트가 하지 못한 일을 합니다. 숨은 손상에 찾아낼 형태(블록)가 있으면 모델은 정답을 들은 것만큼 잘합니다. 숨은 손상이 흩어져 가중치의 자연스러운 분포에 섞이면, 모델은 스크립트보다 낫지만 상한에는 한참 못 미칩니다.
+      </div>
+      <div class="lang-en">
+        <h3>Why is scattered noise so stubborn?</h3>
+        <p>GPT-2 has a weak spot. The table that turns words into numbers is also used, in reverse, to choose the next word. A few columns of that table hold almost the same value for every word, and the model multiplies them by a large factor. One wrong entry in such a column makes one word win every prediction, which is why a damaged model repeats a single word forever. The scripts flagged a quarter to three quarters of the noisy entries, but the model stays collapsed unless nearly every wrong entry in those few columns is caught. Fable's reports show it identified those columns, explained why they dominate, and treated them separately. That insight came from running the broken model and reasoning about what it said.</p>
+      </div>
+      <div class="lang-ko">
+        <h3>산발 노이즈는 왜 이렇게 끈질긴가?</h3>
+        <p>GPT-2에는 약점이 있습니다. 단어를 숫자로 바꾸는 표가, 거꾸로 다음 단어를 고르는 데에도 쓰입니다. 그 표의 몇몇 열은 모든 단어에 대해 거의 같은 값을 가지며, 모델은 그 열에 큰 배수를 곱합니다. 그런 열에서 항목 하나가 틀리면 한 단어가 모든 예측을 차지합니다. 손상된 모델이 한 단어만 끝없이 반복하는 이유입니다. 스크립트도 노이즈 항목의 4분의 1에서 4분의 3은 표시했지만, 그 몇 개 열의 잘못된 항목을 거의 전부 잡지 못하면 모델은 붕괴 상태로 남습니다. Fable의 보고서를 보면 그 열들을 찾아내고, 왜 그 열이 지배적인지 설명하고, 따로 처리했습니다. 이 통찰은 망가진 모델을 돌려 보고 그 출력을 해석하는 데서 나왔습니다.</p>
+      </div>
+    </section>
+
+    <!-- §7 WEIGHTS -->
+    <section id="weights">
+      <span class="section-tag">§7 · Function vs Weights</span>
+      <div class="lang-en">
+        <h2>The Model Works Again, but the Original Numbers Are Mostly Gone</h2>
+        <p>It is tempting to imagine the repair as putting the right numbers back. That is mostly not what happened. The table compares each best repair with the hidden original. <strong>1.00 means the damaged entries are as wrong as before; 0 means perfectly restored.</strong></p>
+      </div>
+      <div class="lang-ko">
+        <h2>모델은 다시 작동하지만, 원래 숫자는 대부분 사라졌다</h2>
+        <p>복구를 "맞는 숫자를 되돌려 놓는 일"로 상상하기 쉽습니다. 실제로는 대체로 그렇지 않았습니다. 아래 표는 가장 좋은 복구를 숨겨 둔 원본과 비교한 것입니다. <strong>1.00은 손상 항목이 전과 똑같이 틀렸다는 뜻이고, 0은 완벽한 복원입니다.</strong></p>
+      </div>
+      <div class="table-wrap"><table id="resid"></table></div>
+      <div class="lang-en">
+        <p style="margin-top:14px;">Only the position table could be rebuilt almost exactly, because it changes smoothly from one position to the next. The word table is partly predictable from similar words. The attention and MLP matrices are close to unpredictable from their own statistics, and the models said so in their reports.</p>
+        <div class="callout">
+          <strong>What this means:</strong> a neural network tolerates a small share of its weights being set to merely reasonable values. What it does not tolerate is a small share being wildly wrong. So a good repair is mostly <em>finding the bad entries and neutralising them</em>. Column B reads differently: its noise is ten times larger than the weights, so just deleting a noisy entry removes most of the error without recovering the value underneath.
+        </div>
+      </div>
+      <div class="lang-ko">
+        <p style="margin-top:14px;">거의 정확히 재구성된 것은 위치 표뿐입니다. 위치에 따라 매끄럽게 변하기 때문입니다. 단어 표는 비슷한 단어로부터 부분적으로 예측됩니다. 어텐션과 MLP 행렬은 자체 통계만으로는 거의 예측되지 않으며, 모델들도 보고서에 그렇게 적었습니다.</p>
+        <div class="callout">
+          <strong>이것이 뜻하는 바:</strong> 신경망은 가중치의 작은 일부가 "그럴듯한 값"으로만 채워져도 견딥니다. 견디지 못하는 것은 작은 일부가 터무니없이 틀린 경우입니다. 그래서 좋은 복구는 대부분 <em>나쁜 항목을 찾아 무력화하는 일</em>입니다. B 열은 다르게 읽어야 합니다. 노이즈가 가중치보다 10배 커서, 노이즈 항목을 지우기만 해도 그 밑의 값을 되찾지 않은 채 오차 대부분이 사라집니다.
+        </div>
+      </div>
+    </section>
+
+    <!-- §8 LIMITS -->
+    <section id="limits">
+      <span class="section-tag">§8 · Limits of This Study</span>
+      <div class="lang-en">
+        <h2>What These Results Do Not Show</h2>
+        <div class="grid-2">
+          <div class="card" style="margin-top:0;">
+            <h3 style="margin-top:0;color:var(--warning);">About the evidence</h3>
+            <ul class="plain" style="font-size:14px;">
+              <li><strong>One run per case.</strong> 28 runs, one random seed, no repeats. Large gaps are real; gaps of a few percent may be luck.</li>
+              <li><strong>One small, old model.</strong> We used GPT-2 because the run environment could not reach the sites that host Qwen and Gemma. GPT-2's weak spot (§6) shapes these results, and newer models may behave differently.</li>
+              <li><strong>Small tests.</strong> The capitals test has 80 questions. The follow-up used a reduced test set.</li>
+              <li><strong>The follow-up is partial.</strong> Models ran only on noise damage at 0.1%, 1% and 3%.</li>
+            </ul>
+          </div>
+          <div class="card" style="margin-top:0;">
+            <h3 style="margin-top:0;color:var(--warning);">About fairness</h3>
+            <ul class="plain" style="font-size:14px;">
+              <li><strong>"Scripts fail" means our scripts.</strong> They were written in an afternoon, after the first-round reports had been read, by the same model family that ran the experiment. A script that copies Fable's handling of the weak spot would probably do much better. Our claim is that the model worked this out unaided, not that no script could.</li>
+              <li><strong>Isolation was by rule and audit, not by a sealed box.</strong> The answer key was encrypted during the runs and the saved scripts contain no downloads or training code, but the models shared one networked machine.</li>
+              <li><strong>Practice text was used for choosing.</strong> Models could compare a few candidate repairs on it. All reported scores use separate test text.</li>
+              <li><strong>Time limits were requests.</strong> One run took 78 minutes instead of 40.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="lang-ko">
+        <h2>이 결과가 보여 주지 않는 것</h2>
+        <div class="grid-2">
+          <div class="card" style="margin-top:0;">
+            <h3 style="margin-top:0;color:var(--warning);">근거에 관하여</h3>
+            <ul class="plain" style="font-size:14px;">
+              <li><strong>경우당 실행 1회.</strong> 28회 실행, 시드 하나, 반복 없음. 큰 차이는 실제이지만 몇 퍼센트 차이는 우연일 수 있습니다.</li>
+              <li><strong>작고 오래된 모델 하나.</strong> 실행 환경에서 Qwen과 Gemma를 받을 수 있는 사이트에 접근할 수 없어 GPT-2를 썼습니다. GPT-2의 약점(§6)이 결과에 영향을 주며, 최신 모델은 다르게 행동할 수 있습니다.</li>
+              <li><strong>작은 시험.</strong> 수도 시험은 80문항입니다. 후속 실험은 축소한 테스트 세트를 썼습니다.</li>
+              <li><strong>후속 실험은 부분적입니다.</strong> 모델은 노이즈 손상의 0.1%, 1%, 3%에서만 실행했습니다.</li>
+            </ul>
+          </div>
+          <div class="card" style="margin-top:0;">
+            <h3 style="margin-top:0;color:var(--warning);">공정성에 관하여</h3>
+            <ul class="plain" style="font-size:14px;">
+              <li><strong>"스크립트가 실패했다"는 우리 스크립트에 대한 말입니다.</strong> 첫 실험의 보고서를 읽은 뒤, 실험을 진행한 것과 같은 계열의 모델이 반나절 동안 작성했습니다. Fable의 약점 처리 방식을 그대로 옮긴 스크립트라면 훨씬 나을 것입니다. 우리의 주장은 모델이 이를 도움 없이 알아냈다는 것이지, 어떤 스크립트로도 불가능하다는 것이 아닙니다.</li>
+              <li><strong>격리는 밀폐된 상자가 아니라 규칙과 감사로 했습니다.</strong> 실행 중 정답은 암호화돼 있었고 남은 스크립트에 다운로드나 학습 코드는 없지만, 모델들은 네트워크가 열린 한 대의 머신을 공유했습니다.</li>
+              <li><strong>연습용 텍스트가 선택에 쓰였습니다.</strong> 모델은 몇 개의 후보 복구를 그 텍스트로 비교할 수 있었습니다. 보고한 점수는 모두 별도의 테스트 텍스트 기준입니다.</li>
+              <li><strong>시간 제한은 요청이었습니다.</strong> 한 실행은 40분이 아니라 78분이 걸렸습니다.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- §9 REPRODUCE -->
+    <section id="reproduce" style="border-bottom:none;">
+      <span class="section-tag">§9 · Reproducibility Guide</span>
+      <div class="lang-en">
+        <h2>Run It Yourself</h2>
+        <p>The <a href="https://github.com/statsleelab/llm-weight-repair" target="_blank" rel="noopener">repository</a> holds the damage code, the task brief given to each model, every script the models wrote with their reports, and all scores. Damage uses a fixed seed, so the same damaged files are rebuilt exactly.</p>
+      </div>
+      <div class="lang-ko">
+        <h2>직접 실행하기</h2>
+        <p><a href="https://github.com/statsleelab/llm-weight-repair" target="_blank" rel="noopener">저장소</a>에는 손상 코드, 각 모델에게 준 과제 설명, 모델이 작성한 모든 스크립트와 보고서, 전체 점수가 있습니다. 손상은 고정 시드를 쓰므로 같은 손상 파일이 정확히 다시 만들어집니다.</p>
+      </div>
+      <pre><code>git clone https://github.com/statsleelab/llm-weight-repair.git
+cd llm-weight-repair
+pip install -r requirements.txt
+bash scripts/fetch_assets.sh              # GPT-2, WikiText-2, BLiMP
+
+python src/prepare.py assets secret       # healthy + 4 damaged checkpoints
+# give agent_kit/ + one damaged file to a repair agent (see agent_kit/TASK.md), then:
 python src/evaluate_runs.py assets secret runs stage results/results.json
-# follow-up: scripted dose grid, extra damaged cells, reduced-suite scores
+
+# follow-up: script grid across damage levels, extra cases, reduced-suite scores
 python src/dose_response.py assets secret/clean.safetensors results/dose_response.json
 python src/make_cells.py secret/clean.safetensors stage secret
 python src/score_llm_lite.py assets secret runs results/llm_lite.json</code></pre>
-  <p class="en">Every agent's scripts and its own report are in <code>runs/</code>. Scores are in <code>results/results.json</code>.</p>
-  <p class="ko">각 에이전트의 스크립트와 자체 보고서는 <code>runs/</code>에, 점수는 <code>results/results.json</code>에 있습니다.</p>
+    </section>
+
+  </main>
+
   <footer>
-    <span class="en">Builds on <a href="https://github.com/statsleelab/weight_space_programming">statsleelab/weight_space_programming</a>. Repair agents were Claude Code sub-agents selected by the aliases fable, opus, sonnet and haiku on the run date.</span>
-    <span class="ko"><a href="https://github.com/statsleelab/weight_space_programming">statsleelab/weight_space_programming</a>의 후속 연구입니다. 복구 에이전트는 실행일 기준 fable, opus, sonnet, haiku 별칭으로 선택한 Claude Code 서브에이전트입니다.</span>
+    <div class="container">
+      <p class="lang-en">Study by <strong>Donghyung Lee</strong>, Miami University · <a href="https://github.com/statsleelab">StatsLeeLab</a> · Repair agents were Claude Code sub-agents (Fable, Opus, Sonnet, Haiku) as available in November 2026.</p>
+      <p class="lang-ko">연구: <strong>Donghyung Lee</strong>, Miami University · <a href="https://github.com/statsleelab">StatsLeeLab</a> · 복구 에이전트는 2026년 11월 기준 Claude Code 서브에이전트(Fable, Opus, Sonnet, Haiku)입니다.</p>
+    </div>
   </footer>
-</section>
-</div>
-<div id="tip" hidden></div>
 
 <script>
 const DATA = {"clean":{"wikitext2_nll":3.365045052308303,"wikitext2_ppl":28.93480084925451,"wikitext2_top1":0.39433092948717946,"blimp_acc":0.8295522388059702,"capitals_acc":0.5625},"cases":{"A":{"condition":"scatter_zero","damaged":{"wikitext2_nll":68.9634017944336,"wikitext2_ppl":5.184705528587072e+21,"wikitext2_top1":0.036783854166666664,"blimp_acc":0.5098507462686567,"capitals_acc":0.025,"n_damaged":1244026,"frac_of_model":0.009997009960028225},"repairs":{"heuristic":{"wikitext2_nll":9.230243854033642,"wikitext2_ppl":10201.028770442375,"wikitext2_top1":0.026667668269230768,"blimp_acc":0.551044776119403,"capitals_acc":0.0125,"residual":0.9522168963155836,"recall":1.0,"precision":0.9621877402518652,"n_changed":1292914,"collateral":0.08415065459174073,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":1.0001250398807315,"attn.c_proj":1.000919944711032,"mlp.c_fc":1.0008283712911121,"mlp.c_proj":0.9991822146552296,"wpe":0.9772169663428297,"wte":0.8571195456636359},"recovery":0.9105892419716836,"status":"ok"},"fable":{"wikitext2_nll":3.414557261344714,"wikitext2_ppl":30.40348564896528,"wikitext2_top1":0.39075020032051283,"blimp_acc":0.8244776119402986,"capitals_acc":0.3875,"residual":0.818160836843359,"recall":1.0,"precision":1.0,"n_changed":1244026,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.8822338510979439,"attn.c_proj":0.9348639901570277,"mlp.c_fc":0.9108750864926701,"mlp.c_proj":0.944201745775283,"wpe":0.19866769418377223,"wte":0.6101777871196006},"recovery":0.9992452218089694,"status":"ok"},"opus":{"wikitext2_nll":3.408716061176398,"wikitext2_ppl":30.22641047272761,"wikitext2_top1":0.3908503605769231,"blimp_acc":0.8250746268656717,"capitals_acc":0.425,"residual":0.8503006874011262,"recall":1.0,"precision":1.0,"n_changed":1244026,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.8807002280534306,"attn.c_proj":0.9297651222057742,"mlp.c_fc":0.9121105873983597,"mlp.c_proj":0.9425513230666207,"wpe":0.1945995882886862,"wte":0.7267042877408286},"recovery":0.9993342667250071,"status":"ok"},"sonnet":{"wikitext2_nll":3.596688301135332,"wikitext2_ppl":36.47723258367233,"wikitext2_top1":0.36015124198717946,"blimp_acc":0.8167164179104478,"capitals_acc":0.325,"residual":0.9153837663528616,"recall":0.9571214749530959,"precision":1.0,"n_changed":1190684,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.9575928839393488,"attn.c_proj":0.9761499585260126,"mlp.c_fc":0.9601245158935401,"mlp.c_proj":0.9877894771426962,"wpe":0.20765140498718695,"wte":0.8153418887813995},"recovery":0.9964687644579628,"status":"ok"},"haiku":{"wikitext2_nll":3.9335141548743615,"wikitext2_ppl":51.08618737381924,"wikitext2_top1":0.31958633814102566,"blimp_acc":0.8,"capitals_acc":0.0125,"residual":0.9373838465038047,"recall":0.7721687488846696,"precision":1.0,"n_changed":960598,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.9713940953309049,"attn.c_proj":1.1528938653461613,"mlp.c_fc":0.9716320056030443,"mlp.c_proj":1.0,"wpe":0.19947520379760544,"wte":0.8306878533706632},"recovery":0.9913340953828954,"status":"ok"},"colmean_zero":{"wikitext2_nll":3.4465130353585267,"wikitext2_ppl":31.390742837590828,"wikitext2_top1":0.3876452323717949,"blimp_acc":0.817910447761194,"capitals_acc":0.425,"residual":0.9521953780193685,"recall":1.0,"precision":1.0,"n_changed":1244026,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":1.0001271129081242,"attn.c_proj":1.000674675538298,"mlp.c_fc":1.0008029111247325,"mlp.c_proj":0.9991684082580221,"wpe":0.9772599069943914,"wte":0.8571141861941969},"recovery":0.9987580789047739,"status":"ok"},"oracle_colmean":{"wikitext2_nll":3.4465130353585267,"wikitext2_ppl":31.390742837590828,"wikitext2_top1":0.3876452323717949,"blimp_acc":0.817910447761194,"capitals_acc":0.425,"residual":0.9521953780193685,"recall":1.0,"precision":1.0,"n_changed":1244026,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":1.0001271129081242,"attn.c_proj":1.000674675538298,"mlp.c_fc":1.0008029111247325,"mlp.c_proj":0.9991684082580221,"wpe":0.9772599069943914,"wte":0.8571141861941969},"recovery":0.9987580789047739,"status":"ok"}}},"B":{"condition":"scatter_noise","damaged":{"wikitext2_nll":373.1636962890625,"wikitext2_ppl":5.184705528587072e+21,"wikitext2_top1":0.0,"blimp_acc":0.5023880597014926,"capitals_acc":0.0125,"n_damaged":1243797,"frac_of_model":0.009995169712894447},"repairs":{"heuristic":{"wikitext2_nll":11.223099219493378,"wikitext2_ppl":74839.35930538698,"wikitext2_top1":0.001727764423076923,"blimp_acc":0.5068656716417911,"capitals_acc":0.025,"residual":0.3215360554499918,"recall":0.4711098354474243,"precision":0.9238444947561598,"n_changed":634268,"collateral":0.0834425468722873,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.345100530367553,"attn.c_proj":0.31525700490598196,"mlp.c_fc":0.3455275955003641,"mlp.c_proj":0.32741420278151556,"wpe":0.2601368989404147,"wte":0.29033223091050003},"recovery":0.9787504520611293,"status":"ok"},"fable":{"wikitext2_nll":4.393882115681966,"wikitext2_ppl":80.95408286140598,"wikitext2_top1":0.29089042467948717,"blimp_acc":0.7280597014925373,"capitals_acc":0.45,"residual":0.1555692526562381,"recall":0.9999895481336585,"precision":0.010015264335278324,"n_changed":124188834,"collateral":0.07022243907745562,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.18510294292934568,"attn.c_proj":0.19198913844365623,"mlp.c_fc":0.15714424634009988,"mlp.c_proj":0.1667629076542469,"wpe":0.019758332429269714,"wte":0.1232931404042954},"recovery":0.9972178452789571,"status":"ok"},"opus":{"wikitext2_nll":7.317803933070256,"wikitext2_ppl":1506.8910997416638,"wikitext2_top1":0.0810546875,"blimp_acc":0.6964179104477612,"capitals_acc":0.0875,"residual":0.19812993524550226,"recall":0.9998954813365847,"precision":0.010018065216926551,"n_changed":124142434,"collateral":0.11543179226682315,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.20933698323593128,"attn.c_proj":0.20250185055648975,"mlp.c_fc":0.20700150387476987,"mlp.c_proj":0.20827206119399966,"wpe":0.19288696023342572,"wte":0.1792770066736332},"recovery":0.9893110511151343,"status":"ok"},"sonnet":{"wikitext2_nll":107.10633615347055,"wikitext2_ppl":5.184705528587072e+21,"wikitext2_top1":0.0,"blimp_acc":0.533134328358209,"capitals_acc":0.0125,"residual":0.28251742028510024,"recall":0.9603054196142939,"precision":0.009970565659738246,"n_changed":119795109,"collateral":0.08696134902554353,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.35640722156222326,"attn.c_proj":0.3542760842975707,"mlp.c_fc":0.2741093204817744,"mlp.c_proj":0.29501120427642713,"wpe":0.02063241074667958,"wte":0.22042975352879485},"recovery":0.7194654692378947,"status":"ok"},"haiku":{"wikitext2_nll":10.303555072882236,"wikitext2_ppl":29838.50859123754,"wikitext2_top1":0.00017528044871794872,"blimp_acc":0.5053731343283582,"capitals_acc":0.0125,"residual":0.8067264331497169,"recall":0.2961174532500078,"precision":0.01970561055879592,"n_changed":18690616,"collateral":0.49015662771009133,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":1.0,"attn.c_proj":1.0,"mlp.c_fc":1.0,"mlp.c_proj":1.0,"wpe":1.0,"wte":0.0862798260773875},"recovery":0.9812370596881064,"status":"ok"},"colmean_zero":{"wikitext2_nll":373.1636962890625,"wikitext2_ppl":5.184705528587072e+21,"wikitext2_top1":0.0,"blimp_acc":0.5023880597014926,"capitals_acc":0.0125,"residual":1.0,"recall":0.0,"precision":null,"n_changed":0,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":1.0,"attn.c_proj":1.0,"mlp.c_fc":1.0,"mlp.c_proj":1.0,"wpe":1.0,"wte":1.0},"recovery":0.0,"status":"ok"},"oracle_colmean":{"wikitext2_nll":3.425379086763431,"wikitext2_ppl":30.73429360730878,"wikitext2_top1":0.38822115384615385,"blimp_acc":0.8116417910447761,"capitals_acc":0.7125,"residual":0.09515014340820965,"recall":1.0,"precision":1.0,"n_changed":1243797,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.09982920050764824,"attn.c_proj":0.10040540105378973,"mlp.c_fc":0.10021969022292995,"mlp.c_proj":0.0993119475246224,"wpe":0.09868129529438148,"wte":0.0858606313254532},"recovery":0.9998368462560548,"status":"ok"}}},"C":{"condition":"block_zero","damaged":{"wikitext2_nll":5.980590037810496,"wikitext2_ppl":395.6737617730905,"wikitext2_top1":0.2744641426282051,"blimp_acc":0.586865671641791,"capitals_acc":0.025,"n_damaged":1245860,"frac_of_model":0.010011748009125826},"repairs":{"heuristic":{"wikitext2_nll":9.61740892361372,"wikitext2_ppl":15024.070945984622,"wikitext2_top1":0.014423076923076924,"blimp_acc":0.5770149253731344,"capitals_acc":0.0125,"residual":0.951084142558967,"recall":1.0,"precision":0.9627789262185815,"n_changed":1294025,"collateral":0.08452762741978787,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":1.000538975678363,"attn.c_proj":1.000606648596321,"mlp.c_fc":1.0006819639759172,"mlp.c_proj":0.998087668554218,"wpe":1.0090205873648828,"wte":0.8590943800336246},"recovery":-1.3904631371136376,"status":"ok"},"fable":{"wikitext2_nll":3.427334088545579,"wikitext2_ppl":30.79443797810403,"wikitext2_top1":0.3896233974358974,"blimp_acc":0.8283582089552238,"capitals_acc":0.55,"residual":0.8335723021436279,"recall":1.0,"precision":1.0,"n_changed":1245860,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.9078946108445757,"attn.c_proj":0.9724028258745896,"mlp.c_fc":0.9164733011532336,"mlp.c_proj":0.9466851707836668,"wpe":0.07181576111469268,"wte":0.6428472607497157},"recovery":0.9761850640755405,"status":"ok"},"opus":{"wikitext2_nll":3.430660987511659,"wikitext2_ppl":30.897058571494856,"wikitext2_top1":0.3893729967948718,"blimp_acc":0.8277611940298507,"capitals_acc":0.5375,"residual":0.8397355993870783,"recall":0.9619901112484549,"precision":1.0,"n_changed":1198505,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.9083967787120122,"attn.c_proj":0.9766327144015959,"mlp.c_fc":0.9168345181373646,"mlp.c_proj":0.9484061057513177,"wpe":0.07832399682146853,"wte":0.661805474714964},"recovery":0.9749130924656003,"status":"ok"},"sonnet":{"wikitext2_nll":3.4355097795144105,"wikitext2_ppl":31.047235776789005,"wikitext2_top1":0.3877203525641026,"blimp_acc":0.8292537313432836,"capitals_acc":0.5125,"residual":0.8737018872319741,"recall":1.0,"precision":1.0,"n_changed":1245860,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.9130044133153595,"attn.c_proj":1.0187453512428253,"mlp.c_fc":0.9192136123128168,"mlp.c_proj":0.9542820443477047,"wpe":0.7648254691577407,"wte":0.7542069798517393},"recovery":0.9730592562556984,"status":"ok"},"haiku":{"wikitext2_nll":3.4307738756522155,"wikitext2_ppl":30.90054667986498,"wikitext2_top1":0.3886969150641026,"blimp_acc":0.8256716417910448,"capitals_acc":0.5,"residual":0.8629031695087304,"recall":1.0,"precision":1.0,"n_changed":1245860,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.9111305168030814,"attn.c_proj":0.9663153561454776,"mlp.c_fc":0.9160761777062637,"mlp.c_proj":0.9468091231248528,"wpe":0.07716490791496383,"wte":0.7410705789139101},"recovery":0.9748699319995475,"status":"ok"},"colmean_zero":{"wikitext2_nll":3.4555650429847913,"wikitext2_ppl":31.676182030984773,"wikitext2_top1":0.38651842948717946,"blimp_acc":0.8244776119402986,"capitals_acc":0.4125,"residual":0.951066456813394,"recall":1.0,"precision":1.0,"n_changed":1245860,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":1.0005427283249724,"attn.c_proj":1.0006061595161124,"mlp.c_fc":1.0006862636008365,"mlp.c_proj":0.9980736546371017,"wpe":1.0090089245074698,"wte":0.8590451094678354},"recovery":0.9653915374508046,"status":"ok"},"oracle_colmean":{"wikitext2_nll":3.4555650429847913,"wikitext2_ppl":31.676182030984773,"wikitext2_top1":0.38651842948717946,"blimp_acc":0.8244776119402986,"capitals_acc":0.4125,"residual":0.951066456813394,"recall":1.0,"precision":1.0,"n_changed":1245860,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":1.0005427283249724,"attn.c_proj":1.0006061595161124,"mlp.c_fc":1.0006862636008365,"mlp.c_proj":0.9980736546371017,"wpe":1.0090089245074698,"wte":0.8590451094678354},"recovery":0.9653915374508046,"status":"ok"}}},"D":{"condition":"block_noise","damaged":{"wikitext2_nll":3.78215967080532,"wikitext2_ppl":43.910772218223855,"wikitext2_top1":0.3518379407051282,"blimp_acc":0.8023880597014925,"capitals_acc":0.4625,"n_damaged":1245860,"frac_of_model":0.010011748009125826},"repairs":{"heuristic":{"wikitext2_nll":9.878025421729454,"wikitext2_ppl":19497.18590803724,"wikitext2_top1":0.01397235576923077,"blimp_acc":0.535223880597015,"capitals_acc":0.0125,"residual":0.9973055680536598,"recall":0.006178061740484485,"precision":0.13524626170687565,"n_changed":56911,"collateral":0.08422657752788028,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.9983858189898926,"attn.c_proj":0.9851190553220496,"mlp.c_fc":0.9999145030129972,"mlp.c_proj":0.9986349957336599,"wpe":0.5911154119840714,"wte":0.9990650751156822},"recovery":-14.61436612528537,"status":"ok"},"fable":{"wikitext2_nll":3.419177238757794,"wikitext2_ppl":30.544274035106625,"wikitext2_top1":0.3883463541666667,"blimp_acc":0.8280597014925373,"capitals_acc":0.6,"residual":0.617782933004191,"recall":0.992642833063105,"precision":0.992642833063105,"n_changed":1245860,"collateral":0.008696156473432378,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.6515045549420113,"attn.c_proj":0.7063474298132321,"mlp.c_fc":0.652910194364345,"mlp.c_proj":0.6698748159825575,"wpe":0.04410146987326286,"wte":0.5354487171463604},"recovery":0.8702222745284144,"status":"ok"},"opus":{"wikitext2_nll":3.6475466887156167,"wikitext2_ppl":38.380391406457896,"wikitext2_top1":0.36733774038461536,"blimp_acc":0.8149253731343283,"capitals_acc":0.425,"residual":0.901892467254801,"recall":0.3761457948726181,"precision":0.5404079250987985,"n_changed":867169,"collateral":0.04935274254555216,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.9811176879546148,"attn.c_proj":0.9936379249825547,"mlp.c_fc":0.8940345973304664,"mlp.c_proj":0.8003161857400329,"wpe":0.5814007457628559,"wte":0.907686621114024},"recovery":0.32272420126331725,"status":"ok"},"sonnet":{"wikitext2_nll":3.777727958483574,"wikitext2_ppl":43.71660287704945,"wikitext2_top1":0.35228866185897434,"blimp_acc":0.7982089552238806,"capitals_acc":0.4375,"residual":0.9963440192686284,"recall":0.3152649575393704,"precision":0.010174654945307499,"n_changed":38603373,"collateral":0.009266571055943352,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":1.0,"attn.c_proj":1.0,"mlp.c_fc":1.0,"mlp.c_proj":1.0,"wpe":0.6639955972290843,"wte":0.992503098464416},"recovery":0.010624687136870458,"status":"ok"},"haiku":{"wikitext2_nll":3.78215967080532,"wikitext2_ppl":43.910772218223855,"wikitext2_top1":0.3518379407051282,"blimp_acc":0.8023880597014925,"capitals_acc":0.4625,"residual":1.0,"recall":0.0,"precision":null,"n_changed":0,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":1.0,"attn.c_proj":1.0,"mlp.c_fc":1.0,"mlp.c_proj":1.0,"wpe":1.0,"wte":1.0},"recovery":0.0,"status":"ok"},"colmean_zero":{"wikitext2_nll":3.78215967080532,"wikitext2_ppl":43.910772218223855,"wikitext2_top1":0.3518379407051282,"blimp_acc":0.8023880597014925,"capitals_acc":0.4625,"residual":1.0,"recall":0.0,"precision":null,"n_changed":0,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":1.0,"attn.c_proj":1.0,"mlp.c_fc":1.0,"mlp.c_proj":1.0,"wpe":1.0,"wte":1.0},"recovery":0.0,"status":"ok"},"oracle_colmean":{"wikitext2_nll":3.430039778733865,"wikitext2_ppl":30.877871007860733,"wikitext2_top1":0.38787059294871795,"blimp_acc":0.8250746268656717,"capitals_acc":0.5,"residual":0.6728126856886004,"recall":1.0,"precision":1.0,"n_changed":1245860,"collateral":0.0,"non_matrix_entries_changed":0,"residual_by_group":{"attn.c_attn":0.6942491621119048,"attn.c_proj":0.708847708622274,"mlp.c_fc":0.7081261538527045,"mlp.c_proj":0.700901041650559,"wpe":0.44054884286228724,"wte":0.6203803641465605},"recovery":0.8441801760394865,"status":"ok"}}}},"dose":{"clean":{"nll":3.473414719104767,"top1":0.38427734375,"blimp":0.8059701492537313},"cells":{"scatter_zero@0.01":{"methods":{"damaged":{"nll":67.35815048217773},"auto":{"nll":3.5150176882743835},"oracle_ridge":{"nll":3.5150176882743835}}},"scatter_noise@0.01":{"methods":{"damaged":{"nll":362.1960983276367},"auto":{"nll":362.1960983276367},"oracle_ridge":{"nll":3.513956308364868}}},"block_zero@0.01":{"methods":{"damaged":{"nll":5.742689251899719},"auto":{"nll":3.5411636233329773},"oracle_ridge":{"nll":3.5411636233329773}}},"block_noise@0.01":{"methods":{"damaged":{"nll":3.8883971571922302},"auto":{"nll":3.7001665234565735},"oracle_ridge":{"nll":3.5398038029670715}}},"scatter_zero@0.03":{"methods":{"damaged":{"nll":67.29934310913086},"auto":{"nll":3.666389763355255},"oracle_ridge":{"nll":3.666389763355255}}},"scatter_noise@0.03":{"methods":{"damaged":{"nll":411.9710388183594},"auto":{"nll":389.0952606201172},"oracle_ridge":{"nll":3.677839756011963}}},"block_zero@0.03":{"methods":{"damaged":{"nll":3.9908432960510254},"auto":{"nll":3.7135801911354065},"oracle_ridge":{"nll":3.7135801911354065}}},"block_noise@0.03":{"methods":{"damaged":{"nll":5.559151768684387},"auto":{"nll":4.208623766899109},"oracle_ridge":{"nll":3.688689410686493}}},"scatter_zero@0.1":{"methods":{"damaged":{"nll":57.72468566894531},"auto":{"nll":5.1611316204071045},"oracle_ridge":{"nll":5.214600086212158}}},"scatter_noise@0.1":{"methods":{"damaged":{"nll":255.76520156860352},"auto":{"nll":255.76520156860352},"oracle_ridge":{"nll":5.531708359718323}}},"block_zero@0.1":{"methods":{"damaged":{"nll":18.074657917022705},"auto":{"nll":5.629215359687805},"oracle_ridge":{"nll":5.629215359687805}}},"block_noise@0.1":{"methods":{"damaged":{"nll":77.73580932617188},"auto":{"nll":10.781419277191162},"oracle_ridge":{"nll":5.54400908946991}}},"scatter_zero@0.001":{"methods":{"damaged":{"nll":32.17451858520508},"auto":{"nll":3.469443202018738},"oracle_ridge":{"nll":3.469443202018738}}},"scatter_noise@0.001":{"methods":{"damaged":{"nll":450.13411712646484},"auto":{"nll":450.13411712646484},"oracle_ridge":{"nll":3.4836878180503845}}},"block_zero@0.001":{"methods":{"damaged":{"nll":3.4822161197662354},"auto":{"nll":3.4827032685279846},"oracle_ridge":{"nll":3.4827032685279846}}},"block_noise@0.001":{"methods":{"damaged":{"nll":3.5048123002052307},"auto":{"nll":3.5038836002349854},"oracle_ridge":{"nll":3.4838197827339172}}},"scatter_zero@0.3":{"methods":{"damaged":{"nll":44.48167896270752},"auto":{"nll":9.488522052764893},"oracle_ridge":{"nll":9.488522052764893}}},"scatter_noise@0.3":{"methods":{"damaged":{"nll":219.43711853027344},"auto":{"nll":219.43711853027344},"oracle_ridge":{"nll":11.036074161529541}}},"block_zero@0.3":{"methods":{"damaged":{"nll":63.16659927368164},"auto":{"nll":11.667779922485352},"oracle_ridge":{"nll":12.361234188079834}}},"block_noise@0.3":{"methods":{"damaged":{"nll":48.37180519104004},"auto":{"nll":28.2948260307312},"oracle_ridge":{"nll":11.298861265182495}}}}},"lite":{"A/fable":{"nll":3.5186341404914856,"top1":0.381103515625,"blimp":0.8059701492537313,"condition":"scatter_zero","frac":0.01,"recall":1.0,"precision":1.0,"residual":0.818160836843359,"n_changed":1244026,"non_matrix_changed":0},"A/opus":{"nll":3.512606978416443,"top1":0.3812255859375,"blimp":0.8119402985074626,"condition":"scatter_zero","frac":0.01,"recall":1.0,"precision":1.0,"residual":0.8503006874011262,"n_changed":1244026,"non_matrix_changed":0},"A/sonnet":{"nll":3.7043173909187317,"top1":0.345947265625,"blimp":0.7880597014925373,"condition":"scatter_zero","frac":0.01,"recall":0.9571214749530959,"precision":1.0,"residual":0.9153837663528616,"n_changed":1190684,"non_matrix_changed":0},"A/haiku":{"nll":4.064818203449249,"top1":0.3052978515625,"blimp":0.7865671641791044,"condition":"scatter_zero","frac":0.01,"recall":0.7721687488846696,"precision":1.0,"residual":0.9373838465038047,"n_changed":960598,"non_matrix_changed":0},"B/fable":{"nll":4.46218204498291,"top1":0.283447265625,"blimp":0.7089552238805971,"condition":"scatter_noise","frac":0.01,"recall":0.9999895481336585,"precision":0.010015264335278324,"residual":0.1555692526562381,"n_changed":124188834,"non_matrix_changed":0},"B/opus":{"nll":7.61030375957489,"top1":0.0758056640625,"blimp":0.7014925373134329,"condition":"scatter_noise","frac":0.01,"recall":0.9998954813365847,"precision":0.010018065216926551,"residual":0.19812993524550226,"n_changed":124142434,"non_matrix_changed":0},"B/sonnet":{"nll":107.23470687866211,"top1":0.0,"blimp":0.5194029850746269,"condition":"scatter_noise","frac":0.01,"recall":0.9603054196142939,"precision":0.009970565659738246,"residual":0.28251742028510024,"n_changed":119795109,"non_matrix_changed":0},"B/haiku":{"nll":10.340222120285034,"top1":0.0001220703125,"blimp":0.47761194029850745,"condition":"scatter_noise","frac":0.01,"recall":0.2961174532500078,"precision":0.01970561055879592,"residual":0.8067264331497169,"n_changed":18690616,"non_matrix_changed":0},"C/fable":{"nll":3.536741316318512,"top1":0.3812255859375,"blimp":0.8059701492537313,"condition":"block_zero","frac":0.01,"recall":1.0,"precision":1.0,"residual":0.8335723021436279,"n_changed":1245860,"non_matrix_changed":0},"C/opus":{"nll":3.5400705337524414,"top1":0.3807373046875,"blimp":0.808955223880597,"condition":"block_zero","frac":0.01,"recall":0.9619901112484549,"precision":1.0,"residual":0.8397355993870783,"n_changed":1198505,"non_matrix_changed":0},"C/sonnet":{"nll":3.542840540409088,"top1":0.3782958984375,"blimp":0.8059701492537313,"condition":"block_zero","frac":0.01,"recall":1.0,"precision":1.0,"residual":0.8737018872319741,"n_changed":1245860,"non_matrix_changed":0},"C/haiku":{"nll":3.5400891304016113,"top1":0.3798828125,"blimp":0.8059701492537313,"condition":"block_zero","frac":0.01,"recall":1.0,"precision":1.0,"residual":0.8629031695087304,"n_changed":1245860,"non_matrix_changed":0},"D/fable":{"nll":3.5307796597480774,"top1":0.3765869140625,"blimp":0.7985074626865671,"condition":"block_noise","frac":0.01,"recall":0.992642833063105,"precision":0.992642833063105,"residual":0.617782933004191,"n_changed":1245860,"non_matrix_changed":0},"D/opus":{"nll":3.761395514011383,"top1":0.355224609375,"blimp":0.7925373134328358,"condition":"block_noise","frac":0.01,"recall":0.3761457948726181,"precision":0.5404079250987985,"residual":0.901892467254801,"n_changed":867169,"non_matrix_changed":0},"D/sonnet":{"nll":3.8873064517974854,"top1":0.33837890625,"blimp":0.7850746268656716,"condition":"block_noise","frac":0.01,"recall":0.3152649575393704,"precision":0.010174654945307499,"residual":0.9963440192686284,"n_changed":38603373,"non_matrix_changed":0},"D/haiku":{"nll":3.8883971571922302,"top1":0.337646484375,"blimp":0.7910447761194029,"condition":"block_noise","frac":0.01,"recall":0.0,"precision":null,"residual":1.0,"n_changed":0,"non_matrix_changed":0},"E/fable":{"nll":3.9809911847114563,"top1":0.3291015625,"blimp":0.7671641791044777,"condition":"scatter_noise","frac":0.001,"recall":0.6953076607486184,"precision":0.8923037216744955,"residual":0.16864433283897537,"n_changed":96865,"non_matrix_changed":0},"E/opus":{"nll":6.202797889709473,"top1":0.134521484375,"blimp":0.6626865671641791,"condition":"scatter_noise","frac":0.001,"recall":0.2109099099823826,"precision":0.35655709836667526,"residual":0.6253703194581202,"n_changed":73531,"non_matrix_changed":0},"E/sonnet":{"nll":5.368534684181213,"top1":0.1966552734375,"blimp":0.7134328358208956,"condition":"scatter_noise","frac":0.001,"recall":0.24929812000740093,"precision":0.9400879720916123,"residual":0.5768690529064404,"n_changed":32965,"non_matrix_changed":0},"E/haiku":{"nll":25.670039176940918,"top1":0.0,"blimp":0.49402985074626865,"condition":"scatter_noise","frac":0.001,"recall":0.27545873589201103,"precision":0.005612465501907701,"residual":0.8083514241420966,"n_changed":6101062,"non_matrix_changed":0},"F/fable":{"nll":7.26267409324646,"top1":0.0697021484375,"blimp":0.5850746268656717,"condition":"scatter_noise","frac":0.03,"recall":0.9998085862729013,"precision":0.03021506512774048,"residual":0.14516457689120443,"n_changed":123429355,"non_matrix_changed":0},"F/opus":{"nll":9.582410097122192,"top1":0.0003662109375,"blimp":0.48059701492537316,"condition":"scatter_noise","frac":0.03,"recall":0.9985174819175687,"precision":0.0299925927046721,"residual":0.2484478523491887,"n_changed":124184329,"non_matrix_changed":0},"F/sonnet":{"nll":9.573639631271362,"top1":0.0140380859375,"blimp":0.5298507462686567,"condition":"scatter_noise","frac":0.03,"recall":0.7456623611982393,"precision":0.337510740508703,"residual":0.14824357040901667,"n_changed":8240997,"non_matrix_changed":0},"F/haiku":{"nll":157.51489639282227,"top1":0.0,"blimp":0.4880597014925373,"condition":"scatter_noise","frac":0.03,"recall":0.6719176760121603,"precision":0.9156495206474857,"residual":0.17128562082562301,"n_changed":2737234,"non_matrix_changed":0},"G/fable":{"nll":3.696351110935211,"top1":0.3555908203125,"blimp":0.7701492537313432,"condition":"block_noise","frac":0.03,"recall":0.9972211509010809,"precision":0.9972211509010809,"residual":0.6254989346897203,"n_changed":3728522,"non_matrix_changed":0},"G/opus":{"nll":3.770114243030548,"top1":0.34716796875,"blimp":0.7507462686567165,"condition":"block_noise","frac":0.03,"recall":0.9961880337570759,"precision":0.9961880337570759,"residual":0.671949588396077,"n_changed":3728522,"non_matrix_changed":0},"G/sonnet":{"nll":3.8729071021080017,"top1":0.3380126953125,"blimp":0.7402985074626866,"condition":"block_noise","frac":0.03,"recall":0.9675190330109357,"precision":0.967450532157115,"residual":0.6654976231724594,"n_changed":3728786,"non_matrix_changed":0},"G/haiku":{"nll":5.559151768684387,"top1":0.178466796875,"blimp":0.6477611940298508,"condition":"block_noise","frac":0.03,"recall":0.0,"precision":null,"residual":1.0,"n_changed":0,"non_matrix_changed":0}}};
 (function(){
-const root=document.documentElement;
+const body=document.body;
 let lang='en'; try{lang=localStorage.getItem('bwr-lang')||'en'}catch(e){}
-function setLang(l){lang=l;root.setAttribute('data-lang',l);
-  document.getElementById('btn-en').setAttribute('aria-pressed',l==='en');
-  document.getElementById('btn-ko').setAttribute('aria-pressed',l==='ko');
-  try{localStorage.setItem('bwr-lang',l)}catch(e){} renderAll();}
-document.getElementById('btn-en').onclick=()=>setLang('en');
-document.getElementById('btn-ko').onclick=()=>setLang('ko');
 const T=(en,ko)=>lang==='ko'?ko:en;
+function setLang(l){lang=l;body.setAttribute('data-lang',l);document.documentElement.lang=l;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.setLang===l));
+  try{localStorage.setItem('bwr-lang',l)}catch(e){} renderAll();}
+document.querySelectorAll('.lang-btn').forEach(b=>b.onclick=()=>setLang(b.dataset.setLang));
 
 const CASES=['A','B','C','D'];
 const CNAME={A:['Scattered erasure','산발 소거'],B:['Scattered noise','산발 노이즈'],C:['Block erasure','블록 소거'],D:['Block noise','블록 노이즈']};
 const ROWS=[['fable','Fable','llm'],['opus','Opus','llm'],['sonnet','Sonnet','llm'],['haiku','Haiku','llm'],
-  ['colmean_zero',['Zeros → column mean','0 → 열 평균'],'scr'],['heuristic',['Outlier + zero heuristic','이상치+0 휴리스틱'],'scr'],
-  ['oracle_colmean',['Known mask → column mean','마스크 공개 → 열 평균'],'ora']];
+  ['colmean_zero',['Script: zeros → column average','스크립트: 0 → 열 평균'],'scr'],['heuristic',['Script: clip outliers + fill zeros','스크립트: 이상치 제거 + 0 채우기'],'scr'],
+  ['oracle_colmean',['Answer-aided: known damage → column average','정답 제공: 손상 위치 공개 → 열 평균'],'ora']];
 const label=r=>Array.isArray(r[1])?T(r[1][0],r[1][1]):r[1];
 const sup=n=>String(n).replace(/[0-9-]/g,c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'['0123456789'.indexOf(c)]||'⁻');
-function fmtPpl(x){ if(x.wikitext2_nll>Math.log(1e6)) return '10'+sup(Math.round(x.wikitext2_nll/Math.LN10));
-  const p=Math.exp(x.wikitext2_nll); return p>=1000?Math.round(p).toLocaleString('en-US'):p.toFixed(1); }
+function fmtN(nll){ if(nll>Math.log(1e6)) return T('collapsed','붕괴');
+  const p=Math.exp(nll); return p>=1000?Math.round(p).toLocaleString('en-US'):p.toFixed(1); }
+const fmtPpl=x=>fmtN(x.wikitext2_nll);
 const f3=v=>(v==null||Number.isNaN(v))?'–':v.toFixed(3);
 
+function renderMini(){
+  document.querySelectorAll('.mini').forEach(el=>{const k=el.dataset.mini;let s='';
+    const sc=[3,17,22,38,41,56,64,79,85,93];
+    for(let i=0;i<100;i++){const r=Math.floor(i/10),c=i%10;let cls='';
+      if(k[0]==='s'&&sc.includes(i)) cls=k[1]==='z'?'z':'n';
+      if(k[0]==='b'&&r>=3&&r<=5&&c>=5&&c<=8) cls=k[1]==='z'?'z':'b';
+      s+=`<i class="${cls}"></i>`;}
+    el.innerHTML=s;});
+}
+
 function renderCond(){
-  const h=[T('Condition','조건'),T('Share of weights hit','손상 비율'),T('Perplexity','Perplexity'),'BLiMP',T('Capitals','수도')];
-  let s='<thead><tr>'+h.map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>';
+  const h=[T('Kind of damage','손상 종류'),T('Perplexity','Perplexity'),T('Grammar (BLiMP)','문법 (BLiMP)'),T('Capitals','수도')];
+  let s='<thead><tr><th>'+h[0]+'</th>'+h.slice(1).map(x=>'<th class="num">'+x+'</th>').join('')+'</tr></thead><tbody>';
   for(const c of CASES){const d=DATA.cases[c].damaged;
-    s+=`<tr><td>${c} · ${T(...CNAME[c])}</td><td class="num">${(d.frac_of_model*100).toFixed(2)}%</td><td class="num">${fmtPpl(d)}</td><td class="num">${f3(d.blimp_acc)}</td><td class="num">${f3(d.capitals_acc)}</td></tr>`;}
+    s+=`<tr><td>${c} · ${T(...CNAME[c])}</td><td class="num">${fmtPpl(d)}</td><td class="num">${f3(d.blimp_acc)}</td><td class="num">${f3(d.capitals_acc)}</td></tr>`;}
+  s+=`<tr class="ref"><td>${T('Healthy GPT-2','정상 GPT-2')}</td><td class="num">${fmtPpl(DATA.clean)}</td><td class="num">${f3(DATA.clean.blimp_acc)}</td><td class="num">${f3(DATA.clean.capitals_acc)}</td></tr>`;
   document.getElementById('cond').innerHTML=s+'</tbody>';
 }
 
-const tip=document.getElementById('tip');
-function showTip(e,txt){tip.textContent=txt;tip.hidden=false;const w=tip.offsetWidth,h=tip.offsetHeight;
-  let x=e.clientX+14,y=e.clientY+14; if(x+w>innerWidth-8)x=e.clientX-w-14; if(y+h>innerHeight-8)y=e.clientY-h-14;
-  tip.style.left=Math.max(8,x)+'px';tip.style.top=Math.max(8,y)+'px';}
-function hideTip(){tip.hidden=true}
-
-function renderPanels(){
-  const host=document.getElementById('panels');host.innerHTML='';
-  const W=460,L=150,R=62,rowH=24,top=8,lo=Math.log10(25),hi=5;
-  const X=p=>L+(Math.min(Math.max(Math.log10(p),lo),hi)-lo)/(hi-lo)*(W-L-R);
-  for(const c of CASES){const cs=DATA.cases[c];
-    const rows=[['damaged',T('Damaged','손상 상태'),'dmg',cs.damaged]].concat(ROWS.filter(r=>cs.repairs[r[0]]&&cs.repairs[r[0]].status==='ok').map(r=>[r[0],label(r),r[2],cs.repairs[r[0]]]));
-    const H=top+rows.length*rowH+26;
-    let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${T(...CNAME[c])}">`;
-    for(const t of [100,1000,10000,100000]){g+=`<line x1="${X(t)}" x2="${X(t)}" y1="${top}" y2="${H-22}" stroke="var(--rule)" stroke-width="1"/>`+
-      `<text x="${X(t)}" y="${H-7}" text-anchor="middle" font-size="10.5" fill="var(--ink-3)" font-family="var(--mono)">${t===100000?'≥10⁵':'10'+sup(Math.log10(t))}</text>`;}
-    const xc=X(DATA.clean.wikitext2_ppl);
-    g+=`<line x1="${xc}" x2="${xc}" y1="${top}" y2="${H-22}" stroke="var(--clean)" stroke-width="1.5" stroke-dasharray="3 2"/>`+
-       `<text x="${xc}" y="${H-7}" text-anchor="middle" font-size="10.5" fill="var(--ink-2)" font-family="var(--mono)">28.9</text>`;
-    rows.forEach((r,i)=>{const y=top+i*rowH+rowH/2,x=X(Math.exp(Math.min(r[3].wikitext2_nll,40))),over=r[3].wikitext2_nll>Math.log(1e5);
-      const sepY=top+i*rowH;
-      if(r[2]==='scr'&&rows[i-1][2]==='llm'||r[2]==='ora'&&rows[i-1][2]!=='ora') g+=`<line x1="0" x2="${W}" y1="${sepY}" y2="${sepY}" stroke="var(--rule)" stroke-width="1"/>`;
-      g+=`<text x="0" y="${y+4}" font-size="12" fill="${r[2]==='llm'?'var(--ink)':'var(--ink-2)'}" font-family="var(--body)" ${r[2]==='ora'?'font-style="italic"':''}>${r[1]}</text>`;
-      g+=`<line x1="${L}" x2="${x}" y1="${y}" y2="${y}" stroke="var(--rule)" stroke-width="1"/>`;
-      if(r[2]==='llm') g+=`<circle cx="${x}" cy="${y}" r="5.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
-      else if(r[2]==='dmg') g+=`<circle cx="${x}" cy="${y}" r="5" fill="var(--surface)" stroke="var(--ink-2)" stroke-width="1.5"/>`;
-      else g+=`<rect x="${x-5}" y="${y-5}" width="10" height="10" fill="${r[2]==='ora'?'var(--surface)':'var(--scripted)'}" stroke="${r[2]==='ora'?'var(--scripted)':'var(--surface)'}" stroke-width="${r[2]==='ora'?1.5:2}"/>`;
-      const lx=over?W-R+8:x+10; g+=`<text x="${lx}" y="${y+4}" font-size="11.5" fill="var(--ink-2)" font-family="var(--mono)">${fmtPpl(r[3])}</text>`;
-      g+=`<rect class="hit" data-c="${c}" data-k="${r[0]}" x="0" y="${top+i*rowH}" width="${W}" height="${rowH}" fill="transparent"/>`;});
-    g+='</svg>';
-    const d=document.createElement('div');d.className='panel';
-    d.innerHTML=`<h3>${c} · ${T(...CNAME[c])}</h3><div class="sub">${T('held-out perplexity, log scale','held-out perplexity, 로그 스케일')}</div>`+g;host.appendChild(d);}
-  host.querySelectorAll('.hit').forEach(el=>{
-    const c=el.dataset.c,k=el.dataset.k,x=k==='damaged'?DATA.cases[c].damaged:DATA.cases[c].repairs[k];
-    const txt=`${T('perplexity','perplexity')}  ${fmtPpl(x)}\n${T('loss (nats/token)','손실 (nats/토큰)')}  ${x.wikitext2_nll.toFixed(2)}\n${T('next-token top-1','다음 토큰 top-1')}  ${f3(x.wikitext2_top1)}\nBLiMP  ${f3(x.blimp_acc)}\n${T('capitals','수도')}  ${f3(x.capitals_acc)}`+(x.residual!=null?`\n${T('weight residual','가중치 잔차')}  ${f3(x.residual)}`:'');
-    el.addEventListener('mousemove',e=>showTip(e,txt));el.addEventListener('mouseleave',hideTip);
-    el.addEventListener('click',e=>{showTip(e,txt);setTimeout(hideTip,3500)});});
+const STORY={
+ A:['All four models noticed that trained weights are never exactly zero, so the zeros mark the damage. Fable and Opus filled each gap from the statistics of its row and column and got back to 30.2–30.4. Sonnet and Haiku used a fancier method (low-rank completion) that fits GPT-2\'s word table less well. A five-line script that fills zeros with the column average does as well as the best models here.',
+    '네 모델 모두 "학습된 가중치는 정확히 0인 경우가 없으니 0이 손상 표시"라는 점을 알아챘습니다. Fable과 Opus는 각 빈칸을 그 행과 열의 통계로 채워 30.2–30.4로 되돌렸습니다. Sonnet과 Haiku는 더 복잡한 방법(저랭크 완성)을 썼는데 GPT-2의 단어 표에는 덜 맞았습니다. 0을 열 평균으로 채우는 5줄짜리 스크립트가 여기서는 최고 모델만큼 합니다.'],
+ B:['The hardest case. About a third of the noisy entries land inside the normal range of the weights, and GPT-2\'s real weights include some genuinely huge values. Clean too gently and noise stays; clean too hard and real weights are deleted. Fable estimated the noise size correctly and built a separate model of "normal" for each matrix, reaching 81. Opus reached 1,507. Sonnet and Haiku did not produce a usable model. With the damage locations known, a simple fill reaches 30.7, so the whole gap is detection.',
+    '가장 어려운 경우입니다. 노이즈 항목의 약 3분의 1은 가중치의 정상 범위 안에 들어가고, GPT-2의 실제 가중치에는 정말로 큰 값들이 있습니다. 약하게 청소하면 노이즈가 남고, 세게 청소하면 진짜 가중치가 지워집니다. Fable은 노이즈 크기를 맞게 추정하고 행렬마다 "정상"의 모형을 따로 세워 81에 도달했습니다. Opus는 1,507이었습니다. Sonnet과 Haiku는 쓸 수 있는 모델을 만들지 못했습니다. 손상 위치를 알면 단순한 채우기로 30.7이 되므로, 격차는 전부 탐지에서 옵니다.'],
+ C:['The easiest case, and the only one where the four models tied (30.8–31.0). A solid rectangle of zeros is obvious. Each model filled it by predicting the missing part from the intact rows and columns of the same matrix.',
+    '가장 쉬운 경우이고, 네 모델이 동률인 유일한 경우입니다(30.8–31.0). 0으로 된 직사각형은 한눈에 보입니다. 각 모델은 같은 행렬의 온전한 행과 열로부터 빠진 부분을 예측해 채웠습니다.'],
+ D:['Nothing marks this damage: the block holds noise the same size as real weights, so simple statistics see nothing. This is where the models separated most clearly. Fable found the block in all 50 matrices (99.3% of its edits were on target) and reached 30.5, as good as the answer-aided script. Opus found 25 of 50. Sonnet did not find the block structure. Haiku found no helpful change, said so, and returned the file untouched.',
+    '이 손상에는 아무 표시가 없습니다. 블록에 실제 가중치와 같은 크기의 노이즈가 들어 있어 단순한 통계로는 아무것도 보이지 않습니다. 모델 간 차이가 가장 뚜렷하게 갈린 곳입니다. Fable은 50개 행렬 전부에서 블록을 찾아(수정의 99.3%가 적중) 30.5에 도달했고, 이는 정답을 받은 스크립트와 같은 수준입니다. Opus는 50개 중 25개를 찾았습니다. Sonnet은 블록 구조를 찾지 못했습니다. Haiku는 도움이 되는 수정을 찾지 못했다고 밝히고 파일을 그대로 제출했습니다.']};
+let curCase='D';
+function renderCase(){
+  document.getElementById('caseTabs').innerHTML=CASES.map(c=>`<button class="tab-btn ${c===curCase?'active':''}" data-c="${c}">${c} · ${T(...CNAME[c])}</button>`).join('');
+  document.querySelectorAll('#caseTabs .tab-btn').forEach(b=>b.onclick=()=>{curCase=b.dataset.c;renderCase()});
+  const cs=DATA.cases[curCase],lo=Math.log10(25),hi=5;
+  const W=n=>{const v=Math.min(Math.max(n/Math.LN10,lo),hi);return Math.max(1.5,(v-lo)/(hi-lo)*100)};
+  const rows=ROWS.filter(r=>cs.repairs[r[0]]&&cs.repairs[r[0]].status==='ok').map(r=>[label(r),r[2],cs.repairs[r[0]]]).concat([[T('Damaged, no repair','손상 상태 (복구 없음)'),'dmg',cs.damaged]]);
+  let s=`<p style="margin-bottom:16px;">${T(...STORY[curCase])}</p>`;
+  let prev='llm';
+  for(const [lab,kind,x] of rows){ if(kind!==prev) s+='<div class="bar-sep"></div>'; prev=kind;
+    const cls=kind==='llm'?'':kind==='scr'?'gray':kind==='ora'?'ref':'red';
+    s+=`<div class="bar-row"><div class="bar-label" ${kind==='llm'?'style="font-weight:700"':''}>${lab}</div><div class="bar-track"><div class="bar-fill ${cls}" style="width:${W(x.wikitext2_nll)}%"></div></div><div class="bar-val">${fmtPpl(x)}</div></div>`;}
+  s+=`<p class="bar-note">${T('Perplexity on unseen text (log scale from 25 to 100,000; longer bars are cut off there). Healthy model: 28.9. One run each.','처음 보는 글에서의 perplexity (25부터 100,000까지 로그 스케일, 더 긴 막대는 거기서 잘림). 정상 모델: 28.9. 각 1회 실행.')}</p>`;
+  document.getElementById('casePanel').innerHTML=s;
 }
 
 const METRICS=[
- ['ppl',['Perplexity','Perplexity'],x=>fmtPpl(x),x=>-x.wikitext2_nll,['WikiText-2 test perplexity; lower is better. Undamaged model: 28.9.','WikiText-2 테스트 perplexity. 낮을수록 좋음. 손상 전 모델: 28.9.']],
- ['top1',['Top-1','Top-1'],x=>f3(x.wikitext2_top1),x=>x.wikitext2_top1,['Next-token top-1 accuracy on WikiText-2 test. Undamaged model: 0.394.','WikiText-2 테스트의 다음 토큰 top-1 정확도. 손상 전 모델: 0.394.']],
- ['blimp',['BLiMP','BLiMP'],x=>f3(x.blimp_acc),x=>x.blimp_acc,['Share of 3,350 grammatical minimal pairs (67 paradigms × 50) where the model prefers the grammatical sentence. Chance is 0.5. Undamaged model: 0.830.','문법 최소쌍 3,350개(67개 유형 × 50) 중 모델이 문법적인 문장을 선호한 비율. 우연 수준 0.5. 손상 전 모델: 0.830.']],
- ['cap',['Capitals','수도'],x=>f3(x.capitals_acc),x=>x.capitals_acc,['80-way forced choice on "The capital of X is". 80 items, so the standard error is about 0.055. Undamaged model: 0.563.','"The capital of X is"에 대한 80지선다. 80문항이라 표준오차는 약 0.055. 손상 전 모델: 0.563.']],
- ['resid',['Weight residual','가중치 잔차'],x=>f3(x.residual),x=>-(x.residual??9),['Distance from the original on damaged entries, relative to the damaged checkpoint. 1 = no closer than before; 0 = restored.','손상 항목에서 원본까지의 거리(손상 체크포인트 대비). 1 = 복구 전과 같음, 0 = 완전 복원.']],
- ['recall',['Damage found','손상 탐지율'],x=>x.recall==null?'–':(x.recall*100).toFixed(1)+'%',x=>x.recall??-1,['Share of damaged entries the repair changed at all. Methods that shrink every weight slightly score 100% here without having located anything.','복구가 조금이라도 바꾼 손상 항목의 비율. 모든 가중치를 조금씩 줄이는 방식은 아무것도 특정하지 않고도 100%가 됩니다.']],
- ['coll',['Collateral','부수 피해'],x=>x.collateral==null?'–':x.collateral.toFixed(4),x=>-(x.collateral??9),['Change made to undamaged entries, as a fraction of their size. 0 means only damaged entries were touched.','손상되지 않은 항목에 가한 변화(크기 대비 비율). 0은 손상 항목만 건드렸다는 뜻.']]];
+ ['ppl',['Perplexity','Perplexity'],x=>fmtPpl(x),x=>-x.wikitext2_nll,['Perplexity on unseen Wikipedia text; lower is better. Healthy model: 28.9.','처음 보는 위키백과 글의 perplexity. 낮을수록 좋음. 정상 모델: 28.9.']],
+ ['top1',['Next-word accuracy','다음 단어 정확도'],x=>f3(x.wikitext2_top1),x=>x.wikitext2_top1,['How often the model\'s first guess for the next word is right. Healthy model: 0.394.','다음 단어에 대한 모델의 첫 번째 추측이 맞는 비율. 정상 모델: 0.394.']],
+ ['blimp',['Grammar','문법'],x=>f3(x.blimp_acc),x=>x.blimp_acc,['BLiMP: given a correct and an incorrect sentence, how often the model prefers the correct one (3,350 pairs; guessing gives 0.5). Healthy model: 0.830.','BLiMP: 맞는 문장과 틀린 문장 중 모델이 맞는 쪽을 선호한 비율 (3,350쌍, 찍으면 0.5). 정상 모델: 0.830.']],
+ ['cap',['Capitals','수도'],x=>f3(x.capitals_acc),x=>x.capitals_acc,['"The capital of X is ___", 80 questions, so differences under about 0.1 mean little. Healthy model: 0.563.','"The capital of X is ___" 80문항. 약 0.1 미만의 차이는 의미가 작습니다. 정상 모델: 0.563.']],
+ ['resid',['Weight error left','남은 가중치 오차'],x=>f3(x.residual),x=>-(x.residual??9),['How far the damaged entries still are from the original. 1 = as wrong as before; 0 = restored.','손상 항목이 원본에서 아직 얼마나 먼지. 1 = 전과 똑같이 틀림, 0 = 복원됨.']],
+ ['recall',['Damage found','찾아낸 손상'],x=>x.recall==null?'–':(x.recall*100).toFixed(1)+'%',x=>x.recall??-1,['Share of damaged entries the repair changed at all. A method that nudges every weight scores 100% here without having located anything.','복구가 조금이라도 바꾼 손상 항목의 비율. 모든 가중치를 조금씩 건드리는 방법은 아무것도 특정하지 않고도 100%가 됩니다.']]];
 let metric='ppl';
 function renderMain(){
-  const seg=document.getElementById('metricSeg');
-  seg.innerHTML=METRICS.map(m=>`<button type="button" id="m-${m[0]}" aria-pressed="${m[0]===metric}">${T(...m[1])}</button>`).join('');
-  METRICS.forEach(m=>document.getElementById('m-'+m[0]).onclick=()=>{metric=m[0];renderMain()});
+  document.getElementById('metricTabs').innerHTML=METRICS.map(m=>`<button class="tab-btn ${m[0]===metric?'active':''}" data-m="${m[0]}">${T(...m[1])}</button>`).join('');
+  document.querySelectorAll('#metricTabs .tab-btn').forEach(b=>b.onclick=()=>{metric=b.dataset.m;renderMain()});
   const M=METRICS.find(m=>m[0]===metric);
-  let s='<thead><tr><th>'+T('Repair by','복구 주체')+'</th>'+CASES.map(c=>`<th>${c} · ${T(...CNAME[c])}</th>`).join('')+'</tr></thead><tbody>';
+  let s='<thead><tr><th>'+T('Repair by','복구 주체')+'</th>'+CASES.map(c=>`<th class="num">${c} · ${T(...CNAME[c])}</th>`).join('')+'</tr></thead><tbody>';
   const best={};for(const c of CASES){let b=null;for(const r of ROWS.filter(r=>r[2]==='llm')){const x=DATA.cases[c].repairs[r[0]];if(x&&x.status==='ok'&&(b===null||M[3](x)>M[3](DATA.cases[c].repairs[b])))b=r[0];}best[c]=b;}
-  const grp=(t)=>`<tr class="grp"><td colspan="5">${t}</td></tr>`;
-  s+=grp(T('Claude models','Claude 모델'));
-  for(const r of ROWS){ if(r[0]==='colmean_zero') s+=grp(T('Scripted baselines, no LLM','스크립트 기준선 (LLM 없음)'));
-    if(r[0]==='oracle_colmean') s+=grp(T('Reference that is told where the damage is','손상 위치를 알려 준 참조'));
-    if(!CASES.some(c=>DATA.cases[c].repairs[r[0]])) continue;
+  const grp=t=>`<tr class="grp"><td colspan="5">${t}</td></tr>`;
+  s+=grp(T('Claude models (blind)','Claude 모델 (블라인드)'));
+  for(const r of ROWS){ if(r[0]==='colmean_zero') s+=grp(T('Simple scripts (blind, no LLM)','단순 스크립트 (블라인드, LLM 없음)'));
+    if(r[0]==='oracle_colmean') s+=grp(T('Yardstick: script that is told where the damage is','잣대: 손상 위치를 알려 준 스크립트'));
     s+=`<tr class="${r[2]==='ora'?'ref':''}"><td>${label(r)}</td>`+CASES.map(c=>{const x=DATA.cases[c].repairs[r[0]];
-      return `<td class="num ${r[2]==='llm'&&best[c]===r[0]&&metric!=='recall'&&metric!=='coll'?'best':''}">${x&&x.status==='ok'?M[2](x):'–'}</td>`}).join('')+'</tr>';}
+      return `<td class="num ${r[2]==='llm'&&best[c]===r[0]&&metric!=='recall'?'best':''}">${x&&x.status==='ok'?M[2](x):'–'}</td>`}).join('')+'</tr>';}
   s+=grp(T('No repair','복구 없음'))+`<tr><td>${T('Damaged','손상 상태')}</td>`+CASES.map(c=>{const d=DATA.cases[c].damaged;
-    const v=metric==='resid'?'1.000':metric==='recall'?'0.0%':metric==='coll'?'0.0000':M[2](d);return `<td class="num">${v}</td>`}).join('')+'</tr>';
+    const v=metric==='resid'?'1.000':metric==='recall'?'0.0%':M[2](d);return `<td class="num">${v}</td>`}).join('')+'</tr>';
   document.getElementById('main').innerHTML=s+'</tbody>';
-  document.getElementById('metricNoteEn').textContent=M[4][0]+' Best Claude model per condition in bold.';
-  document.getElementById('metricNoteKo').textContent=M[4][1]+' 조건별 최고 Claude 모델은 굵게 표시.';
+  document.getElementById('metricNote').textContent=T(M[4][0]+' Best Claude model in each column is in bold.',M[4][1]+' 열마다 가장 좋은 Claude 모델을 굵게 표시했습니다.');
 }
 
-function renderResid(){
-  const G=[['wpe',['Position embedding','위치 임베딩']],['wte',['Token embedding','토큰 임베딩']],['attn.c_attn',['Attention query/key/value','어텐션 Q/K/V']],['attn.c_proj',['Attention output','어텐션 출력']],['mlp.c_fc',['MLP input','MLP 입력']],['mlp.c_proj',['MLP output','MLP 출력']]];
-  const pick={A:'opus',B:'fable',C:'fable',D:'fable'};
-  let s='<thead><tr><th>'+T('Matrix type','행렬 종류')+'</th>'+CASES.map(c=>`<th>${c} · ${pick[c][0].toUpperCase()+pick[c].slice(1)}</th>`).join('')+'</tr></thead><tbody>';
-  for(const g of G) s+=`<tr><td>${T(...g[1])}</td>`+CASES.map(c=>`<td class="num">${f3(DATA.cases[c].repairs[pick[c]].residual_by_group[g[0]])}</td>`).join('')+'</tr>';
-  s+=`<tr><td><strong>${T('All damaged entries','손상 항목 전체')}</strong></td>`+CASES.map(c=>`<td class="num"><strong>${f3(DATA.cases[c].repairs[pick[c]].residual)}</strong></td>`).join('')+'</tr>';
-  document.getElementById('resid').innerHTML=s+'</tbody>';
-}
-
-function renderBaseline(){
+function renderNeed(){
   const g=(c,k)=>{const x=DATA.cases[c].repairs[k];return x&&x.status==='ok'?fmtPpl(x):'–'};
-  const en=`<p>Two scripted repairs were scored alongside the models. The first was fixed before any model ran: fill exact zeros with the column mean and clip entries more than 8 robust standard deviations from the column median. It made every condition worse than a good repair by orders of magnitude (${CASES.map(c=>c+' '+g(c,'heuristic')).join(', ')}), because clipping removes GPT-2's genuinely large weights. Several models tried the same clipping, saw perplexity jump, and backed off.</p>
-<p style="margin-top:1rem">The second was added after the runs, to check how far the simplest sensible idea goes: fill exact zeros with the column mean and touch nothing else (${CASES.map(c=>c+' '+g(c,'colmean_zero')).join(', ')}). It handles both erasure conditions and does nothing for noise, where there are no zeros to find.</p>
-<p style="margin-top:1rem">The reference row gives the same column-mean fill when the script is told exactly which entries are damaged (${CASES.map(c=>c+' '+g(c,'oracle_colmean')).join(', ')}). It is not a blind method; it shows what perfect detection plus a crude fill is worth. Three things follow. The careful value estimates of the best models bought about one perplexity point over a column mean. Fable's blind repair of D matched this reference, so its detection there was close to perfect. And in B the whole gap between 81 and 30.7 is undetected or wrongly cleaned entries.</p>`;
-  const ko=`<p>모델과 함께 스크립트 복구 두 가지를 채점했습니다. 첫 번째는 모델 실행 전에 미리 고정한 것으로, 정확히 0인 항목을 열 평균으로 채우고 열 중앙값에서 로버스트 표준편차 8배 넘게 벗어난 항목을 잘라냅니다. 이 방법은 모든 조건에서 좋은 복구보다 몇 자릿수 나빴습니다(${CASES.map(c=>c+' '+g(c,'heuristic')).join(', ')}). 잘라내기가 GPT-2의 실제로 큰 가중치를 없애기 때문입니다. 여러 모델이 같은 잘라내기를 시도했다가 perplexity가 치솟는 것을 보고 철회했습니다.</p>
-<p style="margin-top:1rem">두 번째는 실행 후에 추가한 것으로, 가장 단순한 합리적 아이디어가 어디까지 가는지 확인하기 위한 것입니다. 정확히 0인 항목만 열 평균으로 채우고 나머지는 건드리지 않습니다(${CASES.map(c=>c+' '+g(c,'colmean_zero')).join(', ')}). 두 소거 조건은 해결하지만, 찾을 0이 없는 노이즈 조건에서는 아무것도 하지 못합니다.</p>
-<p style="margin-top:1rem">참조 행은 어떤 항목이 손상됐는지 스크립트에 정확히 알려 준 상태에서 같은 열 평균 채우기를 한 결과입니다(${CASES.map(c=>c+' '+g(c,'oracle_colmean')).join(', ')}). 블라인드 방법이 아니며, 완벽한 탐지에 거친 채우기를 더하면 어느 정도인지를 보여 줍니다. 여기서 세 가지를 알 수 있습니다. 최고 모델들의 정교한 값 추정은 열 평균 대비 perplexity 1 정도의 이득이었습니다. Fable의 D 블라인드 복구는 이 참조와 같은 수준이므로 그 탐지는 거의 완벽했습니다. 그리고 B에서 81과 30.7 사이의 격차는 전부 탐지하지 못했거나 잘못 지운 항목에서 옵니다.</p>`;
-  document.getElementById('baselineNote').innerHTML=`<div class="en">${en}</div><div class="ko">${ko}</div>`;
+  const b=(c)=>{let m=null;for(const k of ['fable','opus','sonnet','haiku']){const x=DATA.cases[c].repairs[k];if(x&&x.status==='ok'&&(m===null||x.wikitext2_nll<m.wikitext2_nll))m=x;}return fmtPpl(m)};
+  const tbl=(L)=>`<div class="table-wrap"><table><thead><tr><th></th>${CASES.map(c=>`<th class="num">${c} · ${L==='en'?CNAME[c][0]:CNAME[c][1]}</th>`).join('')}</tr></thead><tbody>
+<tr><td>${L==='en'?'Best Claude model (blind)':'최고 Claude 모델 (블라인드)'}</td>${CASES.map(c=>`<td class="num best">${b(c)}</td>`).join('')}</tr>
+<tr><td>${L==='en'?'Simple script: fill zeros (blind)':'단순 스크립트: 0 채우기 (블라인드)'}</td>${CASES.map(c=>`<td class="num">${(c==='B'||c==='D')?(L==='en'?'no effect':'효과 없음'):g(c,'colmean_zero')}</td>`).join('')}</tr>
+<tr class="ref"><td>${L==='en'?'Yardstick: told where the damage is':'잣대: 손상 위치를 알려 줌'}</td>${CASES.map(c=>`<td class="num">${g(c,'oracle_colmean')}</td>`).join('')}</tr></tbody></table></div>`;
+  document.getElementById('needEn').innerHTML=tbl('en')+`
+<div class="grid-3" style="margin-top:18px;">
+<div class="card" style="margin-top:0;"><h3 style="margin-top:0;color:var(--success);">Erasure does not need a frontier model</h3><p style="font-size:14px;">Zeros give the damage away. A five-line script that fills them with the column average scores ${g('A','colmean_zero')} and ${g('C','colmean_zero')}, about the same as the best models and better than Sonnet and Haiku on scattered erasure.</p></div>
+<div class="card" style="margin-top:0;"><h3 style="margin-top:0;color:var(--accent);">Careful value-guessing buys about one point</h3><p style="font-size:14px;">Once the damage is located, a crude column average reaches 30.7–31.7 everywhere. The best models' much more careful estimates improved on that by roughly one perplexity point.</p></div>
+<div class="card" style="margin-top:0;"><h3 style="margin-top:0;color:var(--danger);">Detection is where models differ</h3><p style="font-size:14px;">On hidden noise blocks, Fable's blind result (${g('D','fable')}) equals the yardstick (${g('D','oracle_colmean')}): its detection was nearly perfect. On scattered noise the gap between ${g('B','fable')} and ${g('B','oracle_colmean')} is entirely missed or wrongly cleaned entries.</p></div>
+</div>
+<div class="callout warn"><strong>A warning from our own first attempt.</strong> Before any model ran, we fixed a "sensible" script in advance: fill zeros, and clip any weight that sits far outside its column's usual range. It made everything worse by orders of magnitude (${CASES.map(c=>g(c,'heuristic')).join(', ')}), because GPT-2 really does contain a few enormous weights, and they matter. Several Claude models tried the same clipping, watched perplexity jump, and backed off.</div>`;
+  document.getElementById('needKo').innerHTML=tbl('ko')+`
+<div class="grid-3" style="margin-top:18px;">
+<div class="card" style="margin-top:0;"><h3 style="margin-top:0;color:var(--success);">소거에는 프런티어 모델이 필요 없다</h3><p style="font-size:14px;">0이 손상 위치를 드러냅니다. 0을 열 평균으로 채우는 5줄짜리 스크립트가 ${g('A','colmean_zero')}과 ${g('C','colmean_zero')}을 기록합니다. 최고 모델과 비슷하고, 산발 소거에서는 Sonnet과 Haiku보다 좋습니다.</p></div>
+<div class="card" style="margin-top:0;"><h3 style="margin-top:0;color:var(--accent);">정교한 값 추정의 이득은 1점 정도</h3><p style="font-size:14px;">손상 위치만 알면 거친 열 평균으로도 모든 경우에 30.7–31.7이 됩니다. 최고 모델들의 훨씬 정교한 추정은 여기서 perplexity 1 정도를 더 줄였을 뿐입니다.</p></div>
+<div class="card" style="margin-top:0;"><h3 style="margin-top:0;color:var(--danger);">모델 차이는 탐지에서 난다</h3><p style="font-size:14px;">숨은 노이즈 블록에서 Fable의 블라인드 결과(${g('D','fable')})는 잣대(${g('D','oracle_colmean')})와 같습니다. 탐지가 거의 완벽했다는 뜻입니다. 산발 노이즈에서 ${g('B','fable')}과 ${g('B','oracle_colmean')} 사이의 격차는 전부 놓쳤거나 잘못 지운 항목에서 옵니다.</p></div>
+</div>
+<div class="callout warn"><strong>우리 자신의 첫 시도에서 얻은 경고.</strong> 모델을 돌리기 전에 "상식적인" 스크립트 하나를 미리 고정해 두었습니다. 0을 채우고, 열의 통상 범위를 크게 벗어난 가중치를 잘라내는 것입니다. 이 스크립트는 모든 경우를 몇 자릿수씩 악화시켰습니다(${CASES.map(c=>g(c,'heuristic')).join(', ')}). GPT-2에는 실제로 엄청나게 큰 가중치가 몇 개 있고, 그것들이 중요하기 때문입니다. 여러 Claude 모델도 같은 잘라내기를 시도했다가 perplexity가 치솟는 것을 보고 철회했습니다.</div>`;
 }
 
 const DCOND=[['scatter_zero',['Scattered erasure','산발 소거']],['block_zero',['Block erasure','블록 소거']],['block_noise',['Block noise','블록 노이즈']],['scatter_noise',['Scattered noise','산발 노이즈']]];
 const FR=[0.001,0.01,0.03,0.1,0.3], MODELS4=[['fable','Fable'],['opus','Opus'],['sonnet','Sonnet'],['haiku','Haiku']];
-const fmtN=n=>fmtPpl({wikitext2_nll:n});
+const cellOf=(c,f)=>DATA.dose.cells[c+'@'+f];
 function liteAt(cond,fr){const o={};for(const k in DATA.lite){const v=DATA.lite[k];if(v.condition===cond&&v.frac===fr&&v.nll!=null)o[k.split('/')[1]]=v;}return o;}
 function renderDose(){
   const host=document.getElementById('dosePanels');host.innerHTML='';
   const W=460,H=250,L=44,R=14,top=14,bot=34,lo=Math.log10(30),hi=5;
   const X=i=>L+18+i*(W-L-R-36)/(FR.length-1);
   const Y=n=>{const v=Math.min(Math.max(n/Math.LN10,lo),hi);return H-bot-(v-lo)/(hi-lo)*(H-top-bot)};
-  const cellOf=(c,f)=>DATA.dose.cells[c+'@'+f]||DATA.dose.cells[c+'@'+f.toFixed(1)];
   for(const [cond,nm] of DCOND){
     let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${T(...nm)}">`;
-    for(const t of [100,1000,10000,100000]){const y=Y(Math.log(t));g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--rule)" stroke-width="1"/><text x="${L-6}" y="${y+3.5}" text-anchor="end" font-size="10.5" fill="var(--ink-3)" font-family="var(--mono)">${t===100000?'≥10⁵':'10'+sup(Math.log10(t))}</text>`;}
-    const yc=Y(DATA.dose.clean.nll);g+=`<line x1="${L}" x2="${W-R}" y1="${yc}" y2="${yc}" stroke="var(--clean)" stroke-width="1" stroke-dasharray="1 3"/><text x="${L-6}" y="${yc+3.5}" text-anchor="end" font-size="10.5" fill="var(--ink-2)" font-family="var(--mono)">32</text>`;
-    FR.forEach((f,i)=>{g+=`<text x="${X(i)}" y="${H-12}" text-anchor="middle" font-size="10.5" fill="var(--ink-3)" font-family="var(--mono)">${f*100}%</text>`;});
-    const path=(m)=>FR.map((f,i)=>{const c=cellOf(cond,f);return c?[X(i),Y(c.methods[m].nll),c.methods[m].nll]:null}).filter(Boolean);
+    for(const t of [100,1000,10000,100000]){const y=Y(Math.log(t));g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="1"/><text x="${L-6}" y="${y+3.5}" text-anchor="end" font-size="10.5" fill="var(--text-muted)" font-family="var(--font-mono)">${t===100000?'≥10⁵':'10'+sup(Math.log10(t))}</text>`;}
+    const yc=Y(DATA.dose.clean.nll);g+=`<line x1="${L}" x2="${W-R}" y1="${yc}" y2="${yc}" stroke="var(--text)" stroke-width="1" stroke-dasharray="1 3"/><text x="${L-6}" y="${yc+3.5}" text-anchor="end" font-size="10.5" fill="var(--text)" font-family="var(--font-mono)">32</text>`;
+    FR.forEach((f,i)=>{g+=`<text x="${X(i)}" y="${H-12}" text-anchor="middle" font-size="10.5" fill="var(--text-muted)" font-family="var(--font-mono)">${f*100}%</text>`;});
+    const path=m=>FR.map((f,i)=>{const c=cellOf(cond,f);return c?[X(i),Y(c.methods[m].nll),c.methods[m].nll]:null}).filter(Boolean);
     const ora=path('oracle_ridge'),aut=path('auto');
-    g+=`<polyline fill="none" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="4 3" points="${ora.map(p=>p[0]+','+p[1]).join(' ')}"/>`;
-    g+=`<polyline fill="none" stroke="var(--scripted)" stroke-width="2" points="${aut.map(p=>p[0]+','+p[1]).join(' ')}"/>`;
-    aut.forEach((p,i)=>{g+=`<rect x="${p[0]-4.5}" y="${p[1]-4.5}" width="9" height="9" fill="var(--scripted)" stroke="var(--surface)" stroke-width="1.5"><title>${T('Best blind script','최선의 블라인드 스크립트')}: ${fmtN(p[2])} · ${T('ceiling','상한')}: ${fmtN(ora[i][2])}</title></rect>`;});
+    g+=`<polyline fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-dasharray="4 3" points="${ora.map(p=>p[0]+','+p[1]).join(' ')}"/>`;
+    g+=`<polyline fill="none" stroke="var(--muted-mark)" stroke-width="2" points="${aut.map(p=>p[0]+','+p[1]).join(' ')}"/>`;
+    aut.forEach((p,i)=>{g+=`<rect x="${p[0]-4.5}" y="${p[1]-4.5}" width="9" height="9" fill="var(--muted-mark)" stroke="var(--bg-card)" stroke-width="1.5"><title>${T('Best automatic script','최선의 자동 스크립트')}: ${fmtN(p[2])} · ${T('ceiling','상한')}: ${fmtN(ora[i][2])}</title></rect>`;});
     FR.forEach((f,i)=>{const l=liteAt(cond,f);MODELS4.forEach(([k,n],j)=>{if(!l[k])return;const x=X(i)-16.5+j*11,y=Y(l[k].nll);
-      g+=`<circle cx="${x}" cy="${y}" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.5"><title>${n} · ${f*100}%: ${fmtN(l[k].nll)}</title></circle><text x="${x}" y="${y+(y<top+14?16:-8)}" text-anchor="middle" font-size="9.5" font-weight="600" fill="var(--accent-ink)" font-family="var(--mono)">${n[0]}</text>`;});});
+      g+=`<circle cx="${x}" cy="${y}" r="4.5" fill="var(--accent)" stroke="var(--bg-card)" stroke-width="1.5"><title>${n} · ${f*100}%: ${fmtN(l[k].nll)}</title></circle><text x="${x}" y="${y+(y<top+14?16:-8)}" text-anchor="middle" font-size="9.5" font-weight="600" fill="var(--accent)" font-family="var(--font-mono)">${n[0]}</text>`;});});
     g+='</svg>';
     const d=document.createElement('div');d.className='panel';
-    d.innerHTML=`<h3>${T(...nm)}</h3><div class="sub">${T('perplexity (log) by share of weights damaged','손상 비율별 perplexity (로그)')}</div>`+g;host.appendChild(d);}
+    d.innerHTML=`<h3>${T(...nm)}</h3><div class="sub">${T('perplexity by share of weights damaged','손상 비율별 perplexity')}</div>`+g;host.appendChild(d);}
   const cols=[['scatter_noise',0.001],['scatter_noise',0.01],['scatter_noise',0.03],['block_noise',0.01],['block_noise',0.03]];
   const cn={scatter_noise:['Scattered noise','산발 노이즈'],block_noise:['Block noise','블록 노이즈']};
-  let s='<thead><tr><th>'+T('Repair by','복구 주체')+'</th>'+cols.map(c=>`<th>${T(...cn[c[0]])} ${c[1]*100}%</th>`).join('')+'</tr></thead><tbody>';
+  let s='<thead><tr><th>'+T('Repair by','복구 주체')+'</th>'+cols.map(c=>`<th class="num">${T(...cn[c[0]])} ${c[1]*100}%</th>`).join('')+'</tr></thead><tbody>';
   const grp=t=>`<tr class="grp"><td colspan="6">${t}</td></tr>`;
-  s+=grp(T('Claude models','Claude 모델'));
+  s+=grp(T('Claude models (blind)','Claude 모델 (블라인드)'));
   const lites=cols.map(c=>liteAt(c[0],c[1]));
   for(const [k,n] of MODELS4){s+=`<tr><td>${n}</td>`+lites.map(l=>{const b=Math.min(...MODELS4.map(m=>l[m[0]]?l[m[0]].nll:1e9));
     return `<td class="num ${l[k]&&l[k].nll===b?'best':''}">${l[k]?fmtN(l[k].nll)+(l[k].n_changed===0?' *':''):'–'}</td>`}).join('')+'</tr>';}
   const row=(lab,m,cls)=>`<tr class="${cls||''}"><td>${lab}</td>`+cols.map(c=>`<td class="num">${fmtN(cellOf(c[0],c[1]).methods[m].nll)}</td>`).join('')+'</tr>';
-  s+=grp(T('Scripts, no LLM','스크립트 (LLM 없음)'))+row(T('Best blind script','최선의 블라인드 스크립트'),'auto');
-  s+=grp(T('Reference that is told where the damage is','손상 위치를 알려 준 참조'))+row(T('Ceiling: known mask → ridge','상한: 마스크 공개 → 릿지'),'oracle_ridge','ref');
+  s+=grp(T('Automatic scripts (blind, no LLM)','자동 스크립트 (블라인드, LLM 없음)'))+row(T('Best automatic script','최선의 자동 스크립트'),'auto');
+  s+=grp(T('Ceiling: told where the damage is','상한: 손상 위치를 알려 줌'))+row(T('Ceiling','상한'),'oracle_ridge','ref');
   s+=grp(T('No repair','복구 없음'))+row(T('Damaged','손상 상태'),'damaged');
   document.getElementById('doseTable').innerHTML=s+'</tbody>';
 }
-function renderAll(){renderCond();renderPanels();renderMain();renderResid();renderBaseline();renderDose();}
+
+function renderResid(){
+  const G=[['wpe',['Position table','위치 표']],['wte',['Word table','단어 표']],['attn.c_attn',['Attention: what to look at','어텐션: 무엇을 볼지']],['attn.c_proj',['Attention: output','어텐션: 출력']],['mlp.c_fc',['MLP: input','MLP: 입력']],['mlp.c_proj',['MLP: output','MLP: 출력']]];
+  const pick={A:'opus',B:'fable',C:'fable',D:'fable'};
+  let s='<thead><tr><th>'+T('Part of the model','모델의 부분')+'</th>'+CASES.map(c=>`<th class="num">${c} · ${pick[c][0].toUpperCase()+pick[c].slice(1)}</th>`).join('')+'</tr></thead><tbody>';
+  for(const g of G) s+=`<tr><td>${T(...g[1])}</td>`+CASES.map(c=>`<td class="num">${f3(DATA.cases[c].repairs[pick[c]].residual_by_group[g[0]])}</td>`).join('')+'</tr>';
+  s+=`<tr><td><strong>${T('All damaged entries','손상 항목 전체')}</strong></td>`+CASES.map(c=>`<td class="num"><strong>${f3(DATA.cases[c].repairs[pick[c]].residual)}</strong></td>`).join('')+'</tr>';
+  document.getElementById('resid').innerHTML=s+'</tbody>';
+}
+
+function renderAll(){renderMini();renderCond();renderCase();renderMain();renderNeed();renderDose();renderResid();}
 setLang(lang);
 })();
 </script>
-
 </body>
 </html>
